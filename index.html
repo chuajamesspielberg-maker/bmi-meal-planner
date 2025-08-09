@@ -276,7 +276,7 @@
       <h2>Create Profile</h2>
       <p>Enter client name:</p>
       <input type="text" id="profileNameInput" placeholder="e.g. Juan Dela Cruz" aria-label="Client Name" />
-      <button onclick="saveNewProfile()" aria-label="Save profile">Save Profile</button>
+      <button id="saveProfileBtn" aria-label="Save profile">Save Profile</button>
     </div>
 
     <div id="step1" class="step" tabindex="0">
@@ -287,32 +287,32 @@
         <option value="gain">Gain Muscle</option>
         <option value="maintain">Maintain Weight</option>
       </select>
-      <button onclick="nextStep(2)" aria-label="Next to information input">Next</button>
+      <button id="step1NextBtn" aria-label="Next to information input">Next</button>
     </div>
 
     <div id="step2" class="step" tabindex="0">
       <h2>Step 2: Information</h2>
       <p>Enter your weight (kg):</p>
-      <input type="number" id="weight" placeholder="e.g. 70" min="1" step="any" aria-label="Weight in kilograms"/>
+      <input type="number" id="weight" placeholder="e.g. 70" min="1" step="any" aria-label="Weight in kilograms" />
       <p>Enter your height (cm):</p>
-      <input type="number" id="height" placeholder="e.g. 170" min="50" max="300" step="any" aria-label="Height in centimeters"/>
+      <input type="number" id="height" placeholder="e.g. 170" min="50" max="300" step="any" aria-label="Height in centimeters" />
       <p>Enter your age:</p>
       <input type="number" id="age" placeholder="e.g. 30" min="1" aria-label="Age in years" />
-      <button onclick="nextStep(3)" aria-label="Next to target weight input">Next</button>
+      <button id="step2NextBtn" aria-label="Next to target weight input">Next</button>
     </div>
 
     <div id="step3" class="step" tabindex="0">
       <h2>Step 3: Target Weight</h2>
       <p>Enter your target weight (kg):</p>
       <input type="number" id="targetWeight" placeholder="e.g. 65" min="1" step="any" aria-label="Target Weight in kilograms" />
-      <button onclick="nextStep(4)" aria-label="Next to allergies input">Next</button>
+      <button id="step3NextBtn" aria-label="Next to allergies input">Next</button>
     </div>
 
     <div id="step4" class="step" tabindex="0">
       <h2>Step 4: Allergies</h2>
       <p>Enter any allergies (comma separated), or leave blank if none:</p>
       <textarea id="allergyInput" placeholder="e.g. nuts, shellfish" aria-label="Client allergies input"></textarea>
-      <button onclick="nextStep(5)" aria-label="Next to rice preference">Next</button>
+      <button id="step4NextBtn" aria-label="Next to rice preference">Next</button>
     </div>
 
     <div id="step5" class="step" tabindex="0">
@@ -322,15 +322,15 @@
         <option value="yes">Yes, with rice</option>
         <option value="no">No rice</option>
       </select>
-      <button onclick="nextStep(6)" aria-label="Next to meal plan generation">Next</button>
+      <button id="step5NextBtn" aria-label="Next to meal plan generation">Next</button>
     </div>
 
     <div id="step6" class="step" tabindex="0">
       <h2>Step 6: Meal Plan</h2>
       <div id="mealPlan"></div>
       <div class="button-row">
-        <button id="generateBtn" onclick="generateMealPlan()">Generate Meal Plan</button>
-        <button id="regenerateBtn" style="display:none;" onclick="regenerateMealPlan()">Regenerate Meal Plan</button>
+        <button id="generateBtn">Generate Meal Plan</button>
+        <button id="regenerateBtn" style="display:none;">Regenerate Meal Plan</button>
       </div>
       <div id="weeklyMealPlans"></div>
     </div>
@@ -371,6 +371,7 @@
   let currentAllergies = [];
   let riceAllowed = true;
 
+  // DOM references
   const profileListEl = document.getElementById("profileList");
   const planListEl = document.getElementById("planList");
   const profileTitleEl = document.getElementById("profileTitle");
@@ -389,17 +390,37 @@
   const newProfileBtn = document.getElementById("newProfileBtn");
   const weeklyMealPlansDiv = document.getElementById("weeklyMealPlans");
 
-  // Event listener for new profile button
-  newProfileBtn.addEventListener("click", () => {
-    currentProfile = null;
-    currentAllergies = [];
-    riceAllowed = true;
-    clearInputs();
-    showStep(0);
-    setActiveProfile(null);
-    clearPlanList();
-    regenerateBtn.style.display = "none";
-    weeklyMealPlansDiv.innerHTML = "";
+  // Attach event listeners after DOM content loaded
+  document.addEventListener("DOMContentLoaded", () => {
+    // + New Profile button
+    newProfileBtn.addEventListener("click", () => {
+      currentProfile = null;
+      currentAllergies = [];
+      riceAllowed = true;
+      clearInputs();
+      showStep(0);
+      setActiveProfile(null);
+      clearPlanList();
+      regenerateBtn.style.display = "none";
+      weeklyMealPlansDiv.innerHTML = "";
+    });
+
+    // Save profile button on step 0
+    document.getElementById("saveProfileBtn").addEventListener("click", saveNewProfile);
+
+    // Step navigation buttons
+    document.getElementById("step1NextBtn").addEventListener("click", () => nextStep(2));
+    document.getElementById("step2NextBtn").addEventListener("click", () => nextStep(3));
+    document.getElementById("step3NextBtn").addEventListener("click", () => nextStep(4));
+    document.getElementById("step4NextBtn").addEventListener("click", () => nextStep(5));
+    document.getElementById("step5NextBtn").addEventListener("click", () => nextStep(6));
+
+    // Generate and regenerate meal plan buttons
+    document.getElementById("generateBtn").addEventListener("click", generateMealPlan);
+    document.getElementById("regenerateBtn").addEventListener("click", regenerateMealPlan);
+
+    // Initialize app
+    init();
   });
 
   function clearInputs() {
@@ -508,6 +529,7 @@
         alert("Please enter a valid client name.");
         return;
       }
+      // On moving from step 0 to 1, save name even if not saving yet (optional)
     }
     if (step === 3) {
       const weight = parseFloat(weightInput.value);
@@ -518,9 +540,9 @@
         return;
       }
     }
-    if(step === 4) {
+    if (step === 4) {
       const targetWeight = parseFloat(targetWeightInput.value);
-      if(!targetWeight || targetWeight <= 0) {
+      if (!targetWeight || targetWeight <= 0) {
         alert("Please enter a valid target weight.");
         return;
       }
@@ -723,18 +745,18 @@
     }
 
     const mealPlan = [
-      {...extraMeal, mealTime: "Breakfast"},
-      {...amSnack, mealTime: "AM Snack"},
-      {...lunch, mealTime: "Lunch"},
-      {...pmSnack, mealTime: "PM Snack"},
-      {...extraMeal, mealTime: "Dinner"},
+      { ...extraMeal, mealTime: "Breakfast" },
+      { ...amSnack, mealTime: "AM Snack" },
+      { ...lunch, mealTime: "Lunch" },
+      { ...pmSnack, mealTime: "PM Snack" },
+      { ...extraMeal, mealTime: "Dinner" },
     ];
 
     // Totals
-    let totalCalories = mealPlan.reduce((sum,m) => sum + m.calories, 0);
-    let totalProtein = mealPlan.reduce((sum,m) => sum + m.protein, 0);
-    let totalCarbs = mealPlan.reduce((sum,m) => sum + m.carbs, 0);
-    let totalFat = mealPlan.reduce((sum,m) => sum + m.fat, 0);
+    let totalCalories = mealPlan.reduce((sum, m) => sum + m.calories, 0);
+    let totalProtein = mealPlan.reduce((sum, m) => sum + m.protein, 0);
+    let totalCarbs = mealPlan.reduce((sum, m) => sum + m.carbs, 0);
+    let totalFat = mealPlan.reduce((sum, m) => sum + m.fat, 0);
 
     let bmi = calculateBMI(weight, height).toFixed(1);
     let targetMacros = calculateMacros(calorieTarget, weight, goal);
@@ -798,28 +820,28 @@
 
   function renderWeeklyMealPlans() {
     weeklyMealPlansDiv.innerHTML = "";
-    if(!currentProfile) return;
+    if (!currentProfile) return;
     const plans = profiles[currentProfile].mealPlans || [];
-    if(plans.length === 0) return;
+    if (plans.length === 0) return;
 
     const groups = {};
     plans.forEach(p => {
-      const day = p.date.substring(0,10);
-      if(!groups[day]) groups[day] = [];
+      const day = p.date.substring(0, 10);
+      if (!groups[day]) groups[day] = [];
       groups[day].push(p);
     });
 
-    const sortedDays = Object.keys(groups).sort((a,b) => b.localeCompare(a));
+    const sortedDays = Object.keys(groups).sort((a, b) => b.localeCompare(a));
 
-    sortedDays.slice(0,7).forEach(day => {
+    sortedDays.slice(0, 7).forEach(day => {
       const dayPlans = groups[day];
       const dayDiv = document.createElement("div");
       dayDiv.className = "day-mealplan";
-      const dateDisplay = new Date(day).toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "short", day: "numeric"});
+      const dateDisplay = new Date(day).toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "short", day: "numeric" });
       let html = `<h3>${dateDisplay}</h3>`;
 
       dayPlans.forEach((plan, idx) => {
-        html += `<div><strong>Plan ${idx+1}</strong> (Goal: ${plan.goal}, Calories: ${plan.caloriesNeeded.toFixed(0)} kcal)</div>`;
+        html += `<div><strong>Plan ${idx + 1}</strong> (Goal: ${plan.goal}, Calories: ${plan.caloriesNeeded.toFixed(0)} kcal)</div>`;
         plan.meals.forEach(m => {
           html += `
             <div class="meal-card" style="margin-bottom:6px;">
@@ -838,7 +860,7 @@
 
   function init() {
     loadProfiles();
-    if(!currentProfile) {
+    if (!currentProfile) {
       showStep(0);
       regenerateBtn.style.display = "none";
       clearPlanList();
