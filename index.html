@@ -208,7 +208,7 @@
 </div>
 
 <script>
-  /* Starter Filipino-friendly meal set with built-in base64 images for fast loading */
+  // Filipino-friendly meal set with sample base64 placeholders
   const mealImages = {
     "Adobo Chicken": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2Ht6kAAAABnRSTlMAAAAAAABupgeRAAAANUlEQVR4nO3BMQEAAAgDoJvcva+GET3BkDOmTNnTq1ChQoUKFChQoUKFChQoUKFChQoUKFCk6hPmighOTMAAAAASUVORK5CYII=",
     "Sinigang na Baboy": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2Ht6kAAAABnRSTlMAAAAAAABupgeRAAAAJklEQVR4nO3BMQEAAAwCoNm/9EngAAAAAAAAAAAAAAAAAAAAAAAAAAAALgBg+QAAeeMiH7AAAAAASUVORK5CYII=",
@@ -232,7 +232,6 @@
 
   const extraMeal = { name: "Herbalife Formula 1 Shake", calories: 200, protein: 9, carbs: 25, fat: 3 };
 
-  /* State & DOM elements */
   let profiles = {};
   let currentProfile = null;
   let currentStep = 0;
@@ -245,13 +244,11 @@
   const weightInput = document.getElementById("weight");
   const ageInput = document.getElementById("age");
   const mealPlanDiv = document.getElementById("mealPlan");
-  const generateBtn = document.getElementById("generateBtn");
   const regenerateBtn = document.getElementById("regenerateBtn");
   const newProfileBtn = document.getElementById("newProfileBtn");
 
   newProfileBtn.addEventListener("click", () => {
     currentProfile = null;
-    currentStep = 0;
     clearInputs();
     showStep(0);
     setActiveProfile(null);
@@ -266,19 +263,16 @@
     regenerateBtn.style.display = "none";
   }
 
-  /* Load profiles from localStorage */
   function loadProfiles() {
     const saved = localStorage.getItem("pinoyMealProfiles");
     profiles = saved ? JSON.parse(saved) : {};
     renderProfileList();
   }
 
-  /* Save profiles to localStorage */
   function saveProfiles() {
     localStorage.setItem("pinoyMealProfiles", JSON.stringify(profiles));
   }
 
-  /* Render list of profiles in sidebar */
   function renderProfileList() {
     profileListEl.innerHTML = "";
     for (const name in profiles) {
@@ -289,7 +283,6 @@
       if (currentProfile === name) {
         li.classList.add("active");
       }
-
       const delBtn = document.createElement("button");
       delBtn.textContent = "X";
       delBtn.className = "delete-btn";
@@ -306,33 +299,34 @@
           renderProfileList();
         }
       };
-
       li.appendChild(delBtn);
       profileListEl.appendChild(li);
     }
   }
 
-  /* Show the given step */
   function showStep(step) {
     containerSteps.forEach(s => s.classList.remove("active"));
     document.getElementById(`step${step}`).classList.add("active");
     currentStep = step;
   }
 
-  /* Move to next step */
   function nextStep(step) {
     if (step === 1 && !profileNameInput.value.trim()) {
       alert("Please enter a valid client name.");
       return;
     }
-    if (step === 2 && (weightInput.value <= 0 || ageInput.value <= 0)) {
-      alert("Please enter valid weight and age.");
-      return;
+    if (step === 2) {
+      // no validation; just proceed to weight/age input
+    }
+    if (step === 3) {
+      if (weightInput.value <= 0 || ageInput.value <= 0) {
+        alert("Please enter valid weight and age.");
+        return;
+      }
     }
     showStep(step);
   }
 
-  /* Save new profile */
   function saveNewProfile() {
     const name = profileNameInput.value.trim();
     if (!name) {
@@ -358,7 +352,6 @@
     setActiveProfile(name);
   }
 
-  /* Load profile data into inputs */
   function loadProfile(name) {
     const p = profiles[name];
     if (!p) return;
@@ -369,8 +362,6 @@
     weightInput.value = p.weight || "";
     ageInput.value = p.age || "";
     showStep(1);
-
-    // Show the last meal plan if exists
     if (p.mealPlans && p.mealPlans.length > 0) {
       displayMealPlan(p.mealPlans[p.mealPlans.length - 1]);
       regenerateBtn.style.display = "inline-block";
@@ -380,13 +371,11 @@
     }
   }
 
-  /* Highlight active profile in list */
   function setActiveProfile(name) {
     currentProfile = name;
     renderProfileList();
   }
 
-  /* Generate meal plan */
   function generateMealPlan() {
     if (!currentProfile) {
       alert("Please create or select a profile first.");
@@ -435,7 +424,6 @@
       }
     };
 
-    // Save to profile
     profiles[currentProfile].goal = goal;
     profiles[currentProfile].weight = weight;
     profiles[currentProfile].age = age;
@@ -447,14 +435,12 @@
     showStep(3);
   }
 
-  /* Regenerate meal plan for current profile without deleting */
   function regenerateMealPlan() {
     generateMealPlan();
   }
 
-  /* Display meal plan in UI */
   function displayMealPlan(plan) {
-    let output = `<h3>Target Calories: ${plan.caloriesNeeded} kcal</h3>`;
+    let output = `<h3>Target Calories: ${plan.caloriesNeeded.toFixed(0)} kcal</h3>`;
     plan.meals.forEach(m => {
       output += `
         <div class="meal-card">
@@ -468,7 +454,6 @@
     mealPlanDiv.innerHTML = output;
   }
 
-  /* Initialize app */
   function init() {
     loadProfiles();
     if (!currentProfile) {
