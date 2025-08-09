@@ -69,7 +69,6 @@
     font-size: 14px;
     margin-left: 10px;
   }
-
   #profileTitle {
     margin-bottom: 6px;
     font-weight: bold;
@@ -84,7 +83,6 @@
     cursor: pointer;
     padding: 12px;
   }
-
   .container {
     flex: 1;
     max-width: 700px;
@@ -180,7 +178,6 @@
     display: flex;
     justify-content: space-between;
   }
-
   #sidebar::-webkit-scrollbar {
     width: 6px;
   }
@@ -188,7 +185,6 @@
     background-color: rgba(57,255,20,0.5);
     border-radius: 3px;
   }
-
   @media (max-width: 700px) {
     body {
       flex-direction: column;
@@ -242,7 +238,6 @@
       flex-direction: column;
     }
   }
-
   #weeklyMealPlans {
     margin-top: 20px;
   }
@@ -343,7 +338,6 @@
 </div>
 
 <script>
-  // Meals without noodles, with allergens and rice info
   const meals = [
     { name: "Adobo Chicken", calories: 320, protein: 30, carbs: 10, fat: 18, allergens: [], containsRice: false },
     { name: "Sinigang na Baboy", calories: 280, protein: 28, carbs: 15, fat: 12, allergens: [], containsRice: false },
@@ -395,6 +389,7 @@
   const newProfileBtn = document.getElementById("newProfileBtn");
   const weeklyMealPlansDiv = document.getElementById("weeklyMealPlans");
 
+  // Event listener for new profile button
   newProfileBtn.addEventListener("click", () => {
     currentProfile = null;
     currentAllergies = [];
@@ -435,7 +430,7 @@
     for (const name in profiles) {
       const li = document.createElement("li");
       li.textContent = name;
-      li.title = Client: ${name};
+      li.title = `Client: ${name}`;
       li.onclick = () => loadProfile(name);
       if (currentProfile === name) li.classList.add("active");
       const delBtn = document.createElement("button");
@@ -443,7 +438,7 @@
       delBtn.className = "delete-btn";
       delBtn.onclick = (e) => {
         e.stopPropagation();
-        if (confirm(Delete profile "${name}"? This cannot be undone.)) {
+        if (confirm(`Delete profile "${name}"? This cannot be undone.`)) {
           delete profiles[name];
           if (currentProfile === name) {
             currentProfile = null;
@@ -477,14 +472,14 @@
   function renderPlanList() {
     planListEl.innerHTML = "";
     profileTitleEl.style.display = "block";
-    profileTitleEl.textContent = Past Meal Plans for ${currentProfile};
+    profileTitleEl.textContent = `Past Meal Plans for ${currentProfile}`;
     const plans = profiles[currentProfile].mealPlans || [];
 
     plans.forEach((plan, i) => {
       const li = document.createElement("li");
       const planDate = new Date(plan.date);
       li.textContent = planDate.toLocaleString();
-      li.title = Meal plan generated on ${planDate.toLocaleString()};
+      li.title = `Meal plan generated on ${planDate.toLocaleString()}`;
       li.style.cursor = "pointer";
       li.onclick = () => {
         Array.from(planListEl.children).forEach(item => item.classList.remove("active"));
@@ -496,7 +491,6 @@
       planListEl.appendChild(li);
     });
 
-    // Highlight last created meal plan by default
     if (planListEl.firstChild) {
       planListEl.firstChild.classList.add("active");
     }
@@ -504,7 +498,7 @@
 
   function showStep(step) {
     containerSteps.forEach(s => s.classList.remove("active"));
-    document.getElementById(step${step}).classList.add("active");
+    document.getElementById(`step${step}`).classList.add("active");
     currentStep = step;
   }
 
@@ -541,7 +535,7 @@
       return;
     }
     if (profiles[name]) {
-      if (!confirm(Profile "${name}" already exists. Overwrite?)) return;
+      if (!confirm(`Profile "${name}" already exists. Overwrite?`)) return;
     }
     profiles[name] = {
       goal: "lose",
@@ -675,10 +669,8 @@
     profiles[currentProfile].allergies = currentAllergies;
     profiles[currentProfile].riceAllowed = riceAllowed;
 
-    // Calculate maintenance calories — we use average factor to improve calculation (simplified)
+    // Maintenance calories (simplified)
     const maintenanceCalories = weight * (goal === "lose" ? 30 : goal === "gain" ? 35 : 32);
-
-    // Determine calorie target (deficit or surplus 400 cal)
     const calorieAdjustment = 400;
     let calorieTarget;
     if (targetWeight < weight) {
@@ -689,7 +681,7 @@
       calorieTarget = maintenanceCalories;
     }
 
-    // Filter meals
+    // Filter meals for allergies and riceAllowed
     let availableMeals = filterMeals(currentAllergies, true);
     const riceMeals = availableMeals.filter(m => m.containsRice);
     const nonRiceMeals = availableMeals.filter(m => !m.containsRice);
@@ -701,23 +693,23 @@
       riceMealIncluded = shuffledRice[0];
     }
 
-    // Prepare candidates for snack/lunch excluding Herbalife and rice meal if included
+    // Snack/lunch candidates excluding Herbalife and rice meal if included
     let snackLunchCandidates = nonRiceMeals.filter(m => m.name !== extraMeal.name);
     if (riceMealIncluded) {
       snackLunchCandidates = snackLunchCandidates.filter(m => m.name !== riceMealIncluded.name);
     }
 
     if (snackLunchCandidates.length < 2) {
-      alert("Not enough suitable meals to generate a healthy plan with your allergies and rice preference. Please adjust.");
+      alert("Not enough suitable meals for your allergies and rice preference. Please adjust inputs.");
       return;
     }
 
-    // Pick AM snack and PM snack randomly
+    // Pick AM & PM snack randomly
     const shuffledSnacks = [...snackLunchCandidates].sort(() => 0.5 - Math.random());
     const amSnack = shuffledSnacks[0];
     const pmSnack = shuffledSnacks[1];
 
-    // Determine lunch meal
+    // Pick lunch (rice meal if included, else from nonRice)
     let lunch = null;
     if (riceMealIncluded) {
       lunch = riceMealIncluded;
@@ -730,7 +722,6 @@
       lunch = [...lunchCandidates].sort(() => 0.5 - Math.random())[0];
     }
 
-    // Compose meal plan: breakfast & dinner Herbalife Shake
     const mealPlan = [
       {...extraMeal, mealTime: "Breakfast"},
       {...amSnack, mealTime: "AM Snack"},
@@ -739,7 +730,7 @@
       {...extraMeal, mealTime: "Dinner"},
     ];
 
-    // Calculate totals
+    // Totals
     let totalCalories = mealPlan.reduce((sum,m) => sum + m.calories, 0);
     let totalProtein = mealPlan.reduce((sum,m) => sum + m.protein, 0);
     let totalCarbs = mealPlan.reduce((sum,m) => sum + m.carbs, 0);
@@ -748,7 +739,6 @@
     let bmi = calculateBMI(weight, height).toFixed(1);
     let targetMacros = calculateMacros(calorieTarget, weight, goal);
 
-    // Save plan with timestamp
     const plan = {
       date: new Date().toISOString(),
       goal,
@@ -786,13 +776,13 @@
   }
 
   function displayMealPlan(plan) {
-    let output = <h3>Target Calories: ${plan.caloriesNeeded.toFixed(0)} kcal</h3>;
-    output += <p><strong>Current Weight:</strong> ${plan.weight.toFixed(1)} kg</p>;
-    output += <p><strong>Target Weight:</strong> ${plan.targetWeight.toFixed(1)} kg</p>;
-    output += <p><strong>BMI:</strong> ${plan.bmi} kg/m²</p>;
-    output += <p><strong>Target Macros:</strong> Protein: ${plan.targetMacros.protein}g | Carbs: ${plan.targetMacros.carbs}g | Fat: ${plan.targetMacros.fat}g</p>;
-    output += <p><strong>Allergies:</strong> ${plan.allergies.length > 0 ? plan.allergies.join(", ") : "None"}</p>;
-    output += <p><strong>Rice Allowed:</strong> ${plan.riceAllowed ? "Yes" : "No"}</p>;
+    let output = `<h3>Target Calories: ${plan.caloriesNeeded.toFixed(0)} kcal</h3>`;
+    output += `<p><strong>Current Weight:</strong> ${plan.weight.toFixed(1)} kg</p>`;
+    output += `<p><strong>Target Weight:</strong> ${plan.targetWeight.toFixed(1)} kg</p>`;
+    output += `<p><strong>BMI:</strong> ${plan.bmi} kg/m²</p>`;
+    output += `<p><strong>Target Macros:</strong> Protein: ${plan.targetMacros.protein}g | Carbs: ${plan.targetMacros.carbs}g | Fat: ${plan.targetMacros.fat}g</p>`;
+    output += `<p><strong>Allergies:</strong> ${plan.allergies.length > 0 ? plan.allergies.join(", ") : "None"}</p>`;
+    output += `<p><strong>Rice Allowed:</strong> ${plan.riceAllowed ? "Yes" : "No"}</p>`;
     plan.meals.forEach(m => {
       output += `
         <div class="meal-card">
@@ -802,18 +792,16 @@
         </div>
       `;
     });
-    output += <h3>Daily Total: ${plan.totals.calories} kcal | Protein: ${plan.totals.protein}g | Carbs: ${plan.totals.carbs}g | Fat: ${plan.totals.fat}g</h3>;
+    output += `<h3>Daily Total: ${plan.totals.calories} kcal | Protein: ${plan.totals.protein}g | Carbs: ${plan.totals.carbs}g | Fat: ${plan.totals.fat}g</h3>`;
     mealPlanDiv.innerHTML = output;
   }
 
-  // Show meal plans grouped by day (up to 7 most recent days)
   function renderWeeklyMealPlans() {
     weeklyMealPlansDiv.innerHTML = "";
     if(!currentProfile) return;
     const plans = profiles[currentProfile].mealPlans || [];
     if(plans.length === 0) return;
 
-    // Group meal plans by date
     const groups = {};
     plans.forEach(p => {
       const day = p.date.substring(0,10);
@@ -821,19 +809,17 @@
       groups[day].push(p);
     });
 
-    // Sort days descending (newest first)
     const sortedDays = Object.keys(groups).sort((a,b) => b.localeCompare(a));
 
-    // Show up to 7 days
     sortedDays.slice(0,7).forEach(day => {
       const dayPlans = groups[day];
       const dayDiv = document.createElement("div");
       dayDiv.className = "day-mealplan";
       const dateDisplay = new Date(day).toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "short", day: "numeric"});
-      let html = <h3>${dateDisplay}</h3>;
+      let html = `<h3>${dateDisplay}</h3>`;
 
       dayPlans.forEach((plan, idx) => {
-        html += <div><strong>Plan ${idx+1}</strong> (Goal: ${plan.goal}, Calories: ${plan.caloriesNeeded.toFixed(0)} kcal)</div>;
+        html += `<div><strong>Plan ${idx+1}</strong> (Goal: ${plan.goal}, Calories: ${plan.caloriesNeeded.toFixed(0)} kcal)</div>`;
         plan.meals.forEach(m => {
           html += `
             <div class="meal-card" style="margin-bottom:6px;">
