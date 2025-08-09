@@ -1,119 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BMI & Meal Planner</title>
-<style>
-  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
-  .container { background: #fff; padding: 20px; border-radius: 8px; }
-  input, select, button { width: 100%; padding: 8px; margin: 6px 0; }
-  h2 { margin-top: 20px; }
-  .meal { background: #eef; padding: 10px; margin: 5px 0; border-radius: 5px; }
-</style>
+  <title>Personalized Meal Planner</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    h1, h2 { color: #333; }
+    .meal { background: white; padding: 10px; margin: 10px 0; border-radius: 8px; }
+  </style>
 </head>
 <body>
-<div class="container">
-<h1>BMI & Meal Planner</h1>
 
-<div id="step1">
-  <h2>Step 1: Your Details</h2>
-  <label>Height (cm):</label>
-  <input type="number" id="height">
+<h1>Meal Planner with BMI & Macros</h1>
 
-  <label>Weight (kg):</label>
-  <input type="number" id="weight">
-
-  <label>Age:</label>
-  <input type="number" id="age">
-
-  <label>Gender:</label>
-  <select id="gender">
-    <option value="male">Male</option>
-    <option value="female">Female</option>
-  </select>
-
-  <button onclick="calculateBMI()">Next</button>
-</div>
-
-<div id="step2" style="display:none;">
-  <h2>Step 2: Your Goals & Allergies</h2>
-  <label>Weight Goal:</label>
-  <select id="goal">
-    <option value="lose">Lose weight</option>
-    <option value="maintain">Maintain weight</option>
-    <option value="gain">Gain muscle</option>
-  </select>
-
-  <label>Allergies (comma separated):</label>
-  <input type="text" id="allergies">
-
-  <button onclick="generatePlan()">Generate Meal Plan</button>
-</div>
-
-<div id="result" style="display:none;">
-  <h2>Your BMI & Macros</h2>
-  <p id="bmiResult"></p>
-  <p id="macroResult"></p>
-
-  <h2>Weekly Meal Plan</h2>
-  <div id="mealPlan"></div>
-</div>
-</div>
+<div id="app"></div>
 
 <script>
-function calculateBMI() {
-    let h = parseFloat(document.getElementById("height").value) / 100;
-    let w = parseFloat(document.getElementById("weight").value);
-    if (!h || !w) { alert("Please enter height and weight"); return; }
-    let bmi = (w / (h*h)).toFixed(1);
-    document.getElementById("bmiResult").innerText = `Your BMI is ${bmi} (${bmiStatus(bmi)})`;
-    document.getElementById("step1").style.display = "none";
-    document.getElementById("step2").style.display = "block";
+const meals = {
+  breakfast: [
+    {name: "Omelette with veggies", cal: 300, protein: 20, carbs: 10, fat: 20},
+    {name: "Greek yogurt with berries", cal: 250, protein: 15, carbs: 20, fat: 8},
+    {name: "Oatmeal with banana", cal: 280, protein: 8, carbs: 50, fat: 5},
+    {name: "Smoothie with spinach & protein", cal: 220, protein: 18, carbs: 15, fat: 5},
+    {name: "Whole grain toast with peanut butter", cal: 320, protein: 12, carbs: 30, fat: 15}
+  ],
+  lunch: [
+    {name: "Grilled chicken with quinoa & broccoli", cal: 500, protein: 40, carbs: 45, fat: 15},
+    {name: "Tuna salad with olive oil dressing", cal: 400, protein: 35, carbs: 10, fat: 20},
+    {name: "Beef stir-fry with vegetables", cal: 480, protein: 38, carbs: 30, fat: 18},
+    {name: "Baked salmon with sweet potato", cal: 520, protein: 42, carbs: 35, fat: 20},
+    {name: "Turkey wrap with avocado", cal: 450, protein: 32, carbs: 40, fat: 15}
+  ],
+  dinner: [
+    {name: "Grilled fish with brown rice", cal: 450, protein: 35, carbs: 45, fat: 12},
+    {name: "Chicken breast with roasted veggies", cal: 420, protein: 38, carbs: 20, fat: 15},
+    {name: "Tofu stir-fry with rice noodles", cal: 400, protein: 20, carbs: 50, fat: 12},
+    {name: "Shrimp with garlic pasta", cal: 470, protein: 30, carbs: 55, fat: 15},
+    {name: "Beef and vegetable soup with bread", cal: 440, protein: 28, carbs: 50, fat: 12}
+  ],
+  snack: [
+    {name: "Protein bar", cal: 200, protein: 20, carbs: 20, fat: 6},
+    {name: "Apple with almond butter", cal: 180, protein: 4, carbs: 20, fat: 8},
+    {name: "Cottage cheese with pineapple", cal: 160, protein: 15, carbs: 10, fat: 5},
+    {name: "Mixed nuts", cal: 220, protein: 6, carbs: 8, fat: 18},
+    {name: "Boiled eggs", cal: 140, protein: 12, carbs: 2, fat: 10}
+  ]
+};
+
+function askUser() {
+  let height = parseFloat(prompt("Enter your height in cm:"));
+  let weight = parseFloat(prompt("Enter your weight in kg:"));
+  let bmi = (weight / ((height/100)**2)).toFixed(1);
+  alert("Your BMI is: " + bmi);
+
+  let goal = prompt("Enter your goal: 'lose', 'maintain', or 'gain':").toLowerCase();
+  let allergies = prompt("Enter any allergies (comma-separated):").toLowerCase().split(",").map(a => a.trim());
+
+  let calorieTarget;
+  if(goal === "lose") calorieTarget = weight * 25;
+  else if(goal === "gain") calorieTarget = weight * 35;
+  else calorieTarget = weight * 30;
+
+  let macros = {
+    protein: (weight * 2), // grams
+    carbs: (calorieTarget * 0.5 / 4).toFixed(0),
+    fat: (calorieTarget * 0.25 / 9).toFixed(0)
+  };
+
+  generateMealPlan(goal, allergies, calorieTarget, macros);
 }
 
-function bmiStatus(bmi) {
-    if (bmi < 18.5) return "Underweight";
-    if (bmi < 25) return "Normal weight";
-    if (bmi < 30) return "Overweight";
-    return "Obese";
+function filterMeals(list, allergies) {
+  return list.filter(meal => !allergies.some(allergy => meal.name.toLowerCase().includes(allergy)));
 }
 
-function generatePlan() {
-    let goal = document.getElementById("goal").value;
-    let allergies = document.getElementById("allergies").value.toLowerCase().split(",").map(a => a.trim());
-    
-    let macros = {
-        lose: "Protein: 150g, Carbs: 150g, Fat: 50g",
-        maintain: "Protein: 140g, Carbs: 200g, Fat: 60g",
-        gain: "Protein: 160g, Carbs: 250g, Fat: 70g"
-    };
-    document.getElementById("macroResult").innerText = `Target Macros: ${macros[goal]}`;
-
-    let meals = [
-        "Grilled chicken with quinoa and broccoli",
-        "Salmon with brown rice and spinach",
-        "Beef stir-fry with mixed vegetables",
-        "Tofu salad with chickpeas and avocado",
-        "Egg omelette with whole wheat toast",
-        "Turkey wrap with lettuce and tomato",
-        "Protein shake with banana and oats"
-    ];
-
-    // Filter out allergies
-    let filteredMeals = meals.filter(meal => 
-        !allergies.some(allergy => allergy && meal.toLowerCase().includes(allergy))
-    );
-
-    let mealPlanHTML = "";
-    for (let i = 0; i < 7; i++) {
-        mealPlanHTML += `<div class="meal"><strong>Day ${i+1}:</strong> ${filteredMeals[i % filteredMeals.length]}</div>`;
-    }
-    document.getElementById("mealPlan").innerHTML = mealPlanHTML;
-
-    document.getElementById("step2").style.display = "none";
-    document.getElementById("result").style.display = "block";
+function getRandomMeals(mealList, days=7) {
+  let result = [];
+  for(let i=0; i<days; i++) {
+    result.push(mealList[Math.floor(Math.random() * mealList.length)]);
+  }
+  return result;
 }
+
+function generateMealPlan(goal, allergies, calorieTarget, macros) {
+  let app = document.getElementById("app");
+  app.innerHTML = `<h2>Target: ${calorieTarget} kcal/day | Protein: ${macros.protein}g | Carbs: ${macros.carbs}g | Fat: ${macros.fat}g</h2>`;
+
+  let days = 7;
+  let bList = filterMeals(meals.breakfast, allergies);
+  let lList = filterMeals(meals.lunch, allergies);
+  let dList = filterMeals(meals.dinner, allergies);
+  let sList = filterMeals(meals.snack, allergies);
+
+  let weekPlan = [];
+
+  for(let i=0; i<days; i++) {
+    let breakfast = goal === "lose" ? {name: "Herbalife Formula 1 Shake", cal: 200, protein: 18, carbs: 20, fat: 3} : bList[Math.floor(Math.random()*bList.length)];
+    let lunch = lList[Math.floor(Math.random()*lList.length)];
+    let dinner = goal === "lose" ? {name: "Herbalife Formula 1 Shake", cal: 200, protein: 18, carbs: 20, fat: 3} : dList[Math.floor(Math.random()*dList.length)];
+    let snack = sList[Math.floor(Math.random()*sList.length)];
+
+    let totalCal = breakfast.cal + lunch.cal + dinner.cal + snack.cal;
+    let totalProtein = breakfast.protein + lunch.protein + dinner.protein + snack.protein;
+    let totalCarbs = breakfast.carbs + lunch.carbs + dinner.carbs + snack.carbs;
+    let totalFat = breakfast.fat + lunch.fat + dinner.fat + snack.fat;
+
+    weekPlan.push({day: i+1, meals: [breakfast, lunch, dinner, snack], totals: {cal: totalCal, protein: totalProtein, carbs: totalCarbs, fat: totalFat}});
+  }
+
+  weekPlan.forEach(day => {
+    app.innerHTML += `<div class="meal"><h3>Day ${day.day}</h3>`;
+    day.meals.forEach(m => {
+      app.innerHTML += `<p><b>${m.name}</b> - ${m.cal} kcal | P:${m.protein}g C:${m.carbs}g F:${m.fat}g</p>`;
+    });
+    app.innerHTML += `<p><b>Daily Total:</b> ${day.totals.cal} kcal | P:${day.totals.protein}g C:${day.totals.carbs}g F:${day.totals.fat}g</p></div>`;
+  });
+}
+
+askUser();
 </script>
+
 </body>
 </html>
