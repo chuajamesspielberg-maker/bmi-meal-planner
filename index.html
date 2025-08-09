@@ -310,16 +310,24 @@
     currentStep = step;
   }
 
+  // Fixed nextStep function with correct validation checks
   function nextStep(step) {
-    if (step === 1 && !profileNameInput.value.trim()) {
-      alert("Please enter a valid client name.");
-      return;
+    if (step === 1) {
+      // Step 0 -> Step 1: Validate profile name
+      if (!profileNameInput.value.trim()) {
+        alert("Please enter a valid client name.");
+        return;
+      }
     }
     if (step === 2) {
-      // no validation; just proceed to weight/age input
+      // Step 1 -> Step 2: No validation needed here
+      // Just move on
     }
     if (step === 3) {
-      if (weightInput.value <= 0 || ageInput.value <= 0) {
+      // Step 2 -> Step 3: Validate weight and age
+      const weight = parseFloat(weightInput.value);
+      const age = parseInt(ageInput.value);
+      if (!weight || weight <= 0 || !age || age <= 0) {
         alert("Please enter valid weight and age.");
         return;
       }
