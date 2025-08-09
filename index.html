@@ -175,7 +175,6 @@
   #regenerateBtn:hover {
     background-color: #e6ac00;
   }
-  /* Scrollbar styling */
   #sidebar::-webkit-scrollbar {
     width: 6px;
   }
@@ -183,7 +182,6 @@
     background-color: rgba(57,255,20,0.5);
     border-radius: 3px;
   }
-  /* Responsive */
   @media (max-width: 700px) {
     body {
       flex-direction: column;
@@ -255,7 +253,6 @@
 </style>
 </head>
 <body>
-
 <div id="sidebar">
   <h2>Profiles</h2>
   <ul id="profileList" aria-label="List of profiles"></ul>
@@ -263,10 +260,8 @@
   <ul id="planList" aria-label="List of past meal plans"></ul>
   <button id="newProfileBtn" aria-label="Create new profile">+ New Profile</button>
 </div>
-
 <div class="container">
   <h1>Pinoy Meal Planner</h1>
-
   <div id="stepContainer" role="region" aria-live="polite">
     <div id="step0" class="step" tabindex="0">
       <h2>Create Profile</h2>
@@ -274,7 +269,6 @@
       <input type="text" id="profileNameInput" placeholder="e.g. Juan Dela Cruz" aria-label="Client Name" />
       <button id="saveProfileBtn" aria-label="Save profile">Save Profile</button>
     </div>
-
     <div id="step1" class="step" tabindex="0">
       <h2>Step 1: Goal</h2>
       <p>Select your goal:</p>
@@ -285,7 +279,6 @@
       </select>
       <button id="step1NextBtn" aria-label="Next to information input">Next</button>
     </div>
-
     <div id="step2" class="step" tabindex="0">
       <h2>Step 2: Information</h2>
       <p>Enter your weight (kg):</p>
@@ -296,21 +289,18 @@
       <input type="number" id="age" placeholder="e.g. 30" min="1" aria-label="Age in years" />
       <button id="step2NextBtn" aria-label="Next to target weight input">Next</button>
     </div>
-
     <div id="step3" class="step" tabindex="0">
       <h2>Step 3: Target Weight</h2>
       <p>Enter your target weight (kg):</p>
       <input type="number" id="targetWeight" placeholder="e.g. 65" min="1" step="any" aria-label="Target Weight in kilograms" />
       <button id="step3NextBtn" aria-label="Next to allergies input">Next</button>
     </div>
-
     <div id="step4" class="step" tabindex="0">
       <h2>Step 4: Allergies</h2>
       <p>Enter any allergies (comma separated), or leave blank if none:</p>
       <textarea id="allergyInput" placeholder="e.g. nuts, shellfish" aria-label="Client allergies input"></textarea>
       <button id="step4NextBtn" aria-label="Next to rice preference">Next</button>
     </div>
-
     <div id="step5" class="step" tabindex="0">
       <h2>Step 5: Rice Preference</h2>
       <p>Can the client have meals with rice?</p>
@@ -320,7 +310,6 @@
       </select>
       <button id="step5NextBtn" aria-label="Next to meal plan generation">Next</button>
     </div>
-
     <div id="step6" class="step" tabindex="0">
       <h2>Step 6: Meal Plan</h2>
       <div id="mealPlan"></div>
@@ -331,9 +320,7 @@
     </div>
   </div>
 </div>
-
 <script>
-  // Snack meals (light snacks)
   const snackMeals = [
     { name: "Fresh Mango", calories: 60, protein: 1, carbs: 15, fat: 0, allergens: [], containsRice: false },
     { name: "Boiled Egg", calories: 78, protein: 6, carbs: 1, fat: 5, allergens: [], containsRice: false },
@@ -342,7 +329,6 @@
     { name: "Banana", calories: 89, protein: 1, carbs: 23, fat: 0, allergens: [], containsRice: false }
   ];
 
-  // Meals without noodles and snacks, excluding herbalife
   const meals = [
     { name: "Adobo Chicken", calories: 320, protein: 30, carbs: 10, fat: 18, allergens: [], containsRice: false },
     { name: "Sinigang na Baboy", calories: 280, protein: 28, carbs: 15, fat: 12, allergens: [], containsRice: false },
@@ -368,7 +354,6 @@
     "Herbalife Formula 1 Shake": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD"
   };
 
-  // Viand meals exclude snacks and rice meals
   const viandMeals = meals.filter(m => !m.containsRice && !snackMeals.some(s => s.name === m.name) && m.name !== extraMeal.name);
   const riceMeals = meals.filter(m => m.containsRice);
 
@@ -378,7 +363,6 @@
   let currentAllergies = [];
   let riceAllowed = true;
 
-  // DOM refs...
   const profileListEl = document.getElementById("profileList");
   const planListEl = document.getElementById("planList");
   const profileTitleEl = document.getElementById("profileTitle");
@@ -398,7 +382,6 @@
   const weeklyMealPlansDiv = document.getElementById("weeklyMealPlans");
 
   document.addEventListener("DOMContentLoaded", () => {
-    // + New Profile button
     newProfileBtn.addEventListener("click", () => {
       currentProfile = null;
       currentAllergies = [];
@@ -411,17 +394,14 @@
       weeklyMealPlansDiv.innerHTML = "";
     });
 
-    // Save profile button on step 0
     document.getElementById("saveProfileBtn").addEventListener("click", saveNewProfile);
 
-    // Step navigation buttons
     document.getElementById("step1NextBtn").addEventListener("click", () => nextStep(2));
     document.getElementById("step2NextBtn").addEventListener("click", () => nextStep(3));
     document.getElementById("step3NextBtn").addEventListener("click", () => nextStep(4));
     document.getElementById("step4NextBtn").addEventListener("click", () => nextStep(5));
     document.getElementById("step5NextBtn").addEventListener("click", () => nextStep(6));
 
-    // Regenerate meal plan button
     regenerateBtn.addEventListener("click", regenerateMealPlan);
 
     init();
@@ -506,13 +486,15 @@
       li.textContent = planDate.toLocaleString();
       li.title = `Meal plan generated on ${planDate.toLocaleString()}`;
       li.style.cursor = "pointer";
-      li.onclick = () => {
+
+      li.addEventListener("click", () => {
         Array.from(planListEl.children).forEach(item => item.classList.remove("active"));
         li.classList.add("active");
         displayMealPlan(plan);
         regenerateBtn.style.display = "inline-block";
         showStep(6);
-      };
+      });
+
       planListEl.appendChild(li);
     });
 
@@ -528,11 +510,9 @@
   }
 
   function nextStep(step) {
-    if (step === 1) {
-      if (!profileNameInput.value.trim()) {
-        alert("Please enter a valid client name.");
-        return;
-      }
+    if (step === 1 && !profileNameInput.value.trim()) {
+      alert("Please enter a valid client name.");
+      return;
     }
     if (step === 3) {
       const weight = parseFloat(weightInput.value);
@@ -559,9 +539,7 @@
       alert("Please enter a valid client name.");
       return;
     }
-    if (profiles[name]) {
-      if (!confirm(`Profile "${name}" already exists. Overwrite?`)) return;
-    }
+    if (profiles[name] && !confirm(`Profile "${name}" already exists. Overwrite?`)) return;
     profiles[name] = {
       goal: "lose",
       weight: null,
@@ -575,18 +553,11 @@
     currentProfile = name;
     saveProfiles();
     renderProfileList();
-    goalSelect.value = "lose";
-    weightInput.value = "";
-    heightInput.value = "";
-    ageInput.value = "";
-    targetWeightInput.value = "";
-    allergyInput.value = "";
-    ricePrefSelect.value = "yes";
     showStep(1);
     setActiveProfile(name);
     clearPlanList();
     regenerateBtn.style.display = "none";
-    weeklyMealPlansDiv.innerHTML = "";
+    clearInputs();
   }
 
   function loadProfile(name) {
@@ -609,20 +580,16 @@
       renderPlanList();
       renderWeeklyMealPlans();
 
-      // Display latest saved meal plan immediately
       const lastPlan = p.mealPlans[p.mealPlans.length - 1];
       displayMealPlan(lastPlan);
 
       showStep(6);
       regenerateBtn.style.display = "inline-block";
 
-      // Highlight last plan in list
       const planItems = planListEl.children;
       Array.from(planItems).forEach((item, index) => {
         item.classList.remove("active");
-        if (index === planItems.length - 1) {
-          item.classList.add("active");
-        }
+        if (index === planItems.length - 1) item.classList.add("active");
       });
     } else {
       clearPlanList();
@@ -642,64 +609,44 @@
     let proteinPerKg = 1.8;
     let proteinCalories = proteinPerKg * weight * 4;
     let fatCalories, carbCalories;
-
-    if (goal === 'lose') {
-      fatCalories = caloriesNeeded * 0.25;
-    } else if (goal === 'gain') {
-      fatCalories = caloriesNeeded * 0.20;
-    } else {
-      fatCalories = caloriesNeeded * 0.25;
-    }
+    if (goal === 'lose') fatCalories = caloriesNeeded * 0.25;
+    else if (goal === 'gain') fatCalories = caloriesNeeded * 0.20;
+    else fatCalories = caloriesNeeded * 0.25;
     carbCalories = caloriesNeeded - proteinCalories - fatCalories;
-
-    let proteinGrams = proteinCalories / 4;
-    let fatGrams = fatCalories / 9;
-    let carbGrams = carbCalories / 4;
-
-    proteinGrams = Math.max(0, proteinGrams);
-    fatGrams = Math.max(0, fatGrams);
-    carbGrams = Math.max(0, carbGrams);
-
     return {
-      protein: proteinGrams.toFixed(1),
-      fat: fatGrams.toFixed(1),
-      carbs: carbGrams.toFixed(1)
+      protein: Math.max(0, proteinCalories / 4).toFixed(1),
+      fat: Math.max(0, fatCalories / 9).toFixed(1),
+      carbs: Math.max(0, carbCalories / 4).toFixed(1)
     };
-  }
-
-  function displayMealPlan(plan) {
-    let output = `<h3>Target Calories: ${plan.caloriesNeeded.toFixed(0)} kcal</h3>`;
-    output += `<p><strong>Current Weight:</strong> ${plan.weight.toFixed(1)} kg</p>`;
-    output += `<p><strong>Target Weight:</strong> ${plan.targetWeight.toFixed(1)} kg</p>`;
-    output += `<p><strong>BMI:</strong> ${plan.bmi} kg/m²</p>`;
-    output += `<p><strong>Target Macros:</strong> Protein: ${plan.targetMacros.protein}g | Carbs: ${plan.targetMacros.carbs}g | Fat: ${plan.targetMacros.fat}g</p>`;
-    output += `<p><strong>Allergies:</strong> ${plan.allergies.length > 0 ? plan.allergies.join(", ") : "None"}</p>`;
-    output += `<p><strong>Rice Allowed:</strong> ${plan.riceAllowed ? "Yes" : "No"}</p>`;
-
-    plan.meals.forEach(m => {
-      output += `
-        <div class="meal-card">
-          <h3>${m.mealTime}: ${m.name}</h3>
-          <img src="${mealImages[m.name] || 'https://via.placeholder.com/300'}" alt="${m.name}">
-          <p class="macro">Calories: ${m.calories} | Protein: ${m.protein} g | Carbs: ${m.carbs} g | Fat: ${m.fat} g</p>
-        </div>
-      `;
-    });
-
-    output += `<h3>Daily Total: ${plan.totals.calories} kcal | Protein: ${plan.totals.protein} g | Carbs: ${plan.totals.carbs} g | Fat: ${plan.totals.fat} g</h3>`;
-    mealPlanDiv.innerHTML = output;
   }
 
   function filterMeals(allergies, riceAllowed, mealsList) {
     const lowered = allergies.map(v => v.toLowerCase());
     return mealsList.filter(m => {
       const allergensLower = m.allergens.map(a => a.toLowerCase());
-      for (const allergy of lowered) {
-        if (allergensLower.includes(allergy)) return false;
-      }
+      for (const allergy of lowered) if (allergensLower.includes(allergy)) return false;
       if (!riceAllowed && m.containsRice) return false;
       return true;
     });
+  }
+
+  function displayMealPlan(plan) {
+    let output = `<h3>Target Calories: ${plan.caloriesNeeded.toFixed(0)} kcal</h3>
+                  <p><strong>Current Weight:</strong> ${plan.weight.toFixed(1)} kg</p>
+                  <p><strong>Target Weight:</strong> ${plan.targetWeight.toFixed(1)} kg</p>
+                  <p><strong>BMI:</strong> ${plan.bmi} kg/m²</p>
+                  <p><strong>Target Macros:</strong> Protein: ${plan.targetMacros.protein}g | Carbs: ${plan.targetMacros.carbs}g | Fat: ${plan.targetMacros.fat}g</p>
+                  <p><strong>Allergies:</strong> ${plan.allergies.length ? plan.allergies.join(", ") : "None"}</p>
+                  <p><strong>Rice Allowed:</strong> ${plan.riceAllowed ? "Yes" : "No"}</p>`;
+    plan.meals.forEach(m => {
+      output += `<div class="meal-card">
+                  <h3>${m.mealTime}: ${m.name}</h3>
+                  <img src="${mealImages[m.name] || 'https://via.placeholder.com/300'}" alt="${m.name}">
+                  <p class="macro">Calories: ${m.calories} | Protein: ${m.protein} g | Carbs: ${m.carbs} g | Fat: ${m.fat} g</p>
+                 </div>`;
+    });
+    output += `<h3>Daily Total: ${plan.totals.calories} kcal | Protein: ${plan.totals.protein} g | Carbs: ${plan.totals.carbs} g | Fat: ${plan.totals.fat} g</h3>`;
+    mealPlanDiv.innerHTML = output;
   }
 
   function generateMealPlan() {
@@ -758,16 +705,11 @@
       return;
     }
 
-    // Pick AM and PM snacks
     const shuffledSnacks = [...filteredSnackMeals].sort(() => 0.5 - Math.random());
     const amSnack = shuffledSnacks[0];
     const pmSnack = shuffledSnacks[1];
-
-    // Pick lunch viand and rice meal
     const lunchViand = filteredViandMeals.sort(() => 0.5 - Math.random())[0];
     let lunchRice = riceAllowed ? filteredRiceMeals.sort(() => 0.5 - Math.random())[0] : null;
-
-    // Compose lunch meal combined "Viand + Rice"
     const lunch = {
       name: lunchViand.name + (lunchRice ? " + " + lunchRice.name : ""),
       calories: lunchViand.calories + (lunchRice ? lunchRice.calories : 0),
@@ -883,6 +825,5 @@
 
   init();
 </script>
-
 </body>
 </html>
