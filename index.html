@@ -25,6 +25,7 @@
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
   }
@@ -33,11 +34,16 @@
     text-align: center;
     margin-top: 0;
   }
+  /* Lists scroll horizontally on mobile */
   #profileList, #planList {
     list-style: none;
     padding-left: 0;
     margin: 10px 0 20px 0;
     flex-shrink: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-bottom: 5px;
   }
   #profileList li, #planList li {
     padding: 10px;
@@ -46,10 +52,10 @@
     border-radius: 6px;
     cursor: pointer;
     box-shadow: 0px 0px 5px rgba(57, 255, 20, 0.3);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     color: #a8ffb0;
+    display: inline-block;
+    white-space: normal;
+    margin-right: 10px;
   }
   #profileList li.active, #planList li.active {
     background-color: #39ff14;
@@ -164,20 +170,12 @@
     background-color: #ffbf00;
     color: black;
     margin-top: 0;
-    width: 48%;
-    margin-right: 4%;
-  }
-  #generateBtn {
-    width: 48%;
-    margin-left: 4%;
+    width: 100%;
   }
   #regenerateBtn:hover {
     background-color: #e6ac00;
   }
-  .button-row {
-    display: flex;
-    justify-content: space-between;
-  }
+  /* Scrollbar styling */
   #sidebar::-webkit-scrollbar {
     width: 6px;
   }
@@ -185,6 +183,7 @@
     background-color: rgba(57,255,20,0.5);
     border-radius: 3px;
   }
+  /* Responsive */
   @media (max-width: 700px) {
     body {
       flex-direction: column;
@@ -192,7 +191,7 @@
     }
     #sidebar {
       width: 100%;
-      height: 160px;
+      height: 140px;
       overflow-x: auto;
       overflow-y: hidden;
       white-space: nowrap;
@@ -226,16 +225,13 @@
     }
     .container {
       max-width: 100%;
-      height: calc(100vh - 160px);
+      height: calc(100vh - 140px);
       overflow-y: auto;
       padding: 15px;
     }
-    #regenerateBtn, #generateBtn {
+    #regenerateBtn {
       width: 100%;
       margin: 10px 0;
-    }
-    .button-row {
-      flex-direction: column;
     }
   }
   #weeklyMealPlans {
@@ -329,7 +325,6 @@
       <h2>Step 6: Meal Plan</h2>
       <div id="mealPlan"></div>
       <div class="button-row">
-        <button id="generateBtn">Generate Meal Plan</button>
         <button id="regenerateBtn" style="display:none;">Regenerate Meal Plan</button>
       </div>
       <div id="weeklyMealPlans"></div>
@@ -338,6 +333,16 @@
 </div>
 
 <script>
+  // Snack meals: light, easy, not viands
+  const snackMeals = [
+    { name: "Fresh Mango", calories: 60, protein: 1, carbs: 15, fat: 0, allergens: [], containsRice: false },
+    { name: "Boiled Egg", calories: 78, protein: 6, carbs: 1, fat: 5, allergens: [], containsRice: false },
+    { name: "Fruit Salad", calories: 90, protein: 1, carbs: 22, fat: 0, allergens: [], containsRice: false },
+    { name: "Vegetable Salad", calories: 50, protein: 2, carbs: 8, fat: 1, allergens: [], containsRice: false },
+    { name: "Banana", calories: 89, protein: 1, carbs: 23, fat: 0, allergens: [], containsRice: false }
+  ];
+
+  // Meals without noodles and snacks, excluding herbalife
   const meals = [
     { name: "Adobo Chicken", calories: 320, protein: 30, carbs: 10, fat: 18, allergens: [], containsRice: false },
     { name: "Sinigang na Baboy", calories: 280, protein: 28, carbs: 15, fat: 12, allergens: [], containsRice: false },
@@ -346,8 +351,7 @@
     { name: "Tuna Salad", calories: 180, protein: 20, carbs: 5, fat: 8, allergens: ['fish'], containsRice: false },
     { name: "Beef Stir Fry", calories: 300, protein: 25, carbs: 20, fat: 15, allergens: [], containsRice: false },
     { name: "Fried Rice", calories: 250, protein: 7, carbs: 40, fat: 8, allergens: ['gluten'], containsRice: true },
-    { name: "Steamed Rice", calories: 210, protein: 4, carbs: 45, fat: 0, allergens: [], containsRice: true },
-    { name: "Peanut Bar Snacks", calories: 150, protein: 5, carbs: 15, fat: 8, allergens: ['nuts'], containsRice: false }
+    { name: "Steamed Rice", calories: 210, protein: 4, carbs: 45, fat: 0, allergens: [], containsRice: true }
   ];
 
   const extraMeal = { name: "Herbalife Formula 1 Shake", calories: 200, protein: 9, carbs: 25, fat: 3, allergens: [], containsRice: false };
@@ -361,9 +365,12 @@
     "Beef Stir Fry": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD",
     "Fried Rice": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD",
     "Steamed Rice": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD",
-    "Peanut Bar Snacks": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD",
     "Herbalife Formula 1 Shake": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD"
   };
+
+  // Viand meals exclude snacks and rice meals
+  const viandMeals = meals.filter(m => !m.containsRice && !snackMeals.some(s => s.name === m.name) && m.name !== extraMeal.name);
+  const riceMeals = meals.filter(m => m.containsRice);
 
   let profiles = {};
   let currentProfile = null;
@@ -371,7 +378,7 @@
   let currentAllergies = [];
   let riceAllowed = true;
 
-  // DOM references
+  // DOM refs
   const profileListEl = document.getElementById("profileList");
   const planListEl = document.getElementById("planList");
   const profileTitleEl = document.getElementById("profileTitle");
@@ -390,7 +397,6 @@
   const newProfileBtn = document.getElementById("newProfileBtn");
   const weeklyMealPlansDiv = document.getElementById("weeklyMealPlans");
 
-  // Attach event listeners after DOM content loaded
   document.addEventListener("DOMContentLoaded", () => {
     // + New Profile button
     newProfileBtn.addEventListener("click", () => {
@@ -415,11 +421,9 @@
     document.getElementById("step4NextBtn").addEventListener("click", () => nextStep(5));
     document.getElementById("step5NextBtn").addEventListener("click", () => nextStep(6));
 
-    // Generate and regenerate meal plan buttons
-    document.getElementById("generateBtn").addEventListener("click", generateMealPlan);
-    document.getElementById("regenerateBtn").addEventListener("click", regenerateMealPlan);
+    // Regenerate meal plan button
+    regenerateBtn.addEventListener("click", regenerateMealPlan);
 
-    // Initialize app
     init();
   });
 
@@ -529,7 +533,6 @@
         alert("Please enter a valid client name.");
         return;
       }
-      // On moving from step 0 to 1, save name even if not saving yet (optional)
     }
     if (step === 3) {
       const weight = parseFloat(weightInput.value);
@@ -601,17 +604,32 @@
     ricePrefSelect.value = (p.riceAllowed === false) ? "no" : "yes";
     currentAllergies = p.allergies || [];
     riceAllowed = p.riceAllowed !== false;
-    showStep(1);
+
     if (p.mealPlans && p.mealPlans.length > 0) {
       renderPlanList();
       renderWeeklyMealPlans();
-      displayMealPlan(p.mealPlans[p.mealPlans.length - 1]);
+
+      // Display latest saved meal plan immediately
+      const lastPlan = p.mealPlans[p.mealPlans.length - 1];
+      displayMealPlan(lastPlan);
+
+      showStep(6);
       regenerateBtn.style.display = "inline-block";
+
+      // Highlight last plan in list
+      const planItems = planListEl.children;
+      Array.from(planItems).forEach((item, index) => {
+        item.classList.remove("active");
+        if (index === planItems.length - 1) {
+          item.classList.add("active");
+        }
+      });
     } else {
       clearPlanList();
       mealPlanDiv.innerHTML = "";
       weeklyMealPlansDiv.innerHTML = "";
       regenerateBtn.style.display = "none";
+      showStep(0);
     }
   }
 
@@ -649,9 +667,32 @@
     };
   }
 
-  function filterMeals(allergies, riceAllowed) {
+  function displayMealPlan(plan) {
+    let output = `<h3>Target Calories: ${plan.caloriesNeeded.toFixed(0)} kcal</h3>`;
+    output += `<p><strong>Current Weight:</strong> ${plan.weight.toFixed(1)} kg</p>`;
+    output += `<p><strong>Target Weight:</strong> ${plan.targetWeight.toFixed(1)} kg</p>`;
+    output += `<p><strong>BMI:</strong> ${plan.bmi} kg/m²</p>`;
+    output += `<p><strong>Target Macros:</strong> Protein: ${plan.targetMacros.protein}g | Carbs: ${plan.targetMacros.carbs}g | Fat: ${plan.targetMacros.fat}g</p>`;
+    output += `<p><strong>Allergies:</strong> ${plan.allergies.length > 0 ? plan.allergies.join(", ") : "None"}</p>`;
+    output += `<p><strong>Rice Allowed:</strong> ${plan.riceAllowed ? "Yes" : "No"}</p>`;
+
+    plan.meals.forEach(m => {
+      output += `
+        <div class="meal-card">
+          <h3>${m.mealTime}: ${m.name}</h3>
+          <img src="${mealImages[m.name] || 'https://via.placeholder.com/300'}" alt="${m.name}">
+          <p class="macro">Calories: ${m.calories} | Protein: ${m.protein} g | Carbs: ${m.carbs} g | Fat: ${m.fat} g</p>
+        </div>
+      `;
+    });
+
+    output += `<h3>Daily Total: ${plan.totals.calories} kcal | Protein: ${plan.totals.protein} g | Carbs: ${plan.totals.carbs} g | Fat: ${plan.totals.fat} g</h3>`;
+    mealPlanDiv.innerHTML = output;
+  }
+
+  function filterMeals(allergies, riceAllowed, mealsList) {
     const lowered = allergies.map(v => v.toLowerCase());
-    return meals.filter(m => {
+    return mealsList.filter(m => {
       const allergensLower = m.allergens.map(a => a.toLowerCase());
       for (const allergy of lowered) {
         if (allergensLower.includes(allergy)) return false;
@@ -677,12 +718,10 @@
       return;
     }
 
-    // Save allergies and rice preference from inputs
     const allergyStr = allergyInput.value.trim();
     currentAllergies = allergyStr ? allergyStr.split(",").map(a => a.trim().toLowerCase()).filter(a => a) : [];
     riceAllowed = ricePrefSelect.value === "yes";
 
-    // Update profile info
     profiles[currentProfile].goal = goal;
     profiles[currentProfile].weight = weight;
     profiles[currentProfile].height = height;
@@ -691,7 +730,6 @@
     profiles[currentProfile].allergies = currentAllergies;
     profiles[currentProfile].riceAllowed = riceAllowed;
 
-    // Maintenance calories (simplified)
     const maintenanceCalories = weight * (goal === "lose" ? 30 : goal === "gain" ? 35 : 32);
     const calorieAdjustment = 400;
     let calorieTarget;
@@ -703,56 +741,55 @@
       calorieTarget = maintenanceCalories;
     }
 
-    // Filter meals for allergies and riceAllowed
-    let availableMeals = filterMeals(currentAllergies, true);
-    const riceMeals = availableMeals.filter(m => m.containsRice);
-    const nonRiceMeals = availableMeals.filter(m => !m.containsRice);
+    // Filter snack meals, viand meals, rice meals
+    const filteredSnackMeals = filterMeals(currentAllergies, riceAllowed, snackMeals);
+    const filteredViandMeals = filterMeals(currentAllergies, riceAllowed, viandMeals);
+    const filteredRiceMeals = filterMeals(currentAllergies, riceAllowed, riceMeals);
 
-    // Pick one rice meal if allowed and available
-    let riceMealIncluded = null;
-    if (riceAllowed && riceMeals.length > 0) {
-      const shuffledRice = [...riceMeals].sort(() => 0.5 - Math.random());
-      riceMealIncluded = shuffledRice[0];
+    if (filteredSnackMeals.length < 2) {
+      alert("Not enough suitable snack meals for your allergies. Please adjust.");
+      return;
     }
-
-    // Snack/lunch candidates excluding Herbalife and rice meal if included
-    let snackLunchCandidates = nonRiceMeals.filter(m => m.name !== extraMeal.name);
-    if (riceMealIncluded) {
-      snackLunchCandidates = snackLunchCandidates.filter(m => m.name !== riceMealIncluded.name);
+    if (filteredViandMeals.length === 0) {
+      alert("No suitable viands available for lunch after filtering allergies. Please adjust.");
+      return;
     }
-
-    if (snackLunchCandidates.length < 2) {
-      alert("Not enough suitable meals for your allergies and rice preference. Please adjust inputs.");
+    if (riceAllowed && filteredRiceMeals.length === 0) {
+      alert("No rice meals available for rice preference. Please adjust.");
       return;
     }
 
-    // Pick AM & PM snack randomly
-    const shuffledSnacks = [...snackLunchCandidates].sort(() => 0.5 - Math.random());
+    // Pick AM and PM snack, no repeats
+    const shuffledSnacks = [...filteredSnackMeals].sort(() => 0.5 - Math.random());
     const amSnack = shuffledSnacks[0];
     const pmSnack = shuffledSnacks[1];
 
-    // Pick lunch (rice meal if included, else from nonRice)
-    let lunch = null;
-    if (riceMealIncluded) {
-      lunch = riceMealIncluded;
-    } else {
-      const lunchCandidates = snackLunchCandidates.filter(m => m.name !== amSnack.name && m.name !== pmSnack.name);
-      if (lunchCandidates.length === 0) {
-        alert("Not enough suitable meals for lunch after selecting snacks. Please adjust.");
-        return;
-      }
-      lunch = [...lunchCandidates].sort(() => 0.5 - Math.random())[0];
-    }
+    // Pick lunch viand and rice meal
+    const lunchViand = filteredViandMeals.sort(() => 0.5 - Math.random())[0];
+    let lunchRice = riceAllowed ? filteredRiceMeals.sort(() => 0.5 - Math.random())[0] : null;
 
+    // Compose lunch as combined meal
+    const lunch = {
+      name: lunchViand.name + (lunchRice ? " + " + lunchRice.name : ""),
+      calories: lunchViand.calories + (lunchRice ? lunchRice.calories : 0),
+      protein: lunchViand.protein + (lunchRice ? lunchRice.protein : 0),
+      carbs: lunchViand.carbs + (lunchRice ? lunchRice.carbs : 0),
+      fat: lunchViand.fat + (lunchRice ? lunchRice.fat : 0),
+      allergens: [...new Set([...(lunchViand.allergens), ...(lunchRice ? lunchRice.allergens : [])])],
+      containsRice: !!lunchRice,
+      mealTime: "Lunch"
+    };
+
+    // Full meal plan array
     const mealPlan = [
-      { ...extraMeal, mealTime: "Breakfast" },
-      { ...amSnack, mealTime: "AM Snack" },
-      { ...lunch, mealTime: "Lunch" },
-      { ...pmSnack, mealTime: "PM Snack" },
-      { ...extraMeal, mealTime: "Dinner" },
+      {...extraMeal, mealTime: "Breakfast"},
+      {...amSnack, mealTime: "AM Snack"},
+      lunch,
+      {...pmSnack, mealTime: "PM Snack"},
+      {...extraMeal, mealTime: "Dinner"},
     ];
 
-    // Totals
+    // Calculate totals
     let totalCalories = mealPlan.reduce((sum, m) => sum + m.calories, 0);
     let totalProtein = mealPlan.reduce((sum, m) => sum + m.protein, 0);
     let totalCarbs = mealPlan.reduce((sum, m) => sum + m.carbs, 0);
@@ -797,27 +834,6 @@
     generateMealPlan();
   }
 
-  function displayMealPlan(plan) {
-    let output = `<h3>Target Calories: ${plan.caloriesNeeded.toFixed(0)} kcal</h3>`;
-    output += `<p><strong>Current Weight:</strong> ${plan.weight.toFixed(1)} kg</p>`;
-    output += `<p><strong>Target Weight:</strong> ${plan.targetWeight.toFixed(1)} kg</p>`;
-    output += `<p><strong>BMI:</strong> ${plan.bmi} kg/m²</p>`;
-    output += `<p><strong>Target Macros:</strong> Protein: ${plan.targetMacros.protein}g | Carbs: ${plan.targetMacros.carbs}g | Fat: ${plan.targetMacros.fat}g</p>`;
-    output += `<p><strong>Allergies:</strong> ${plan.allergies.length > 0 ? plan.allergies.join(", ") : "None"}</p>`;
-    output += `<p><strong>Rice Allowed:</strong> ${plan.riceAllowed ? "Yes" : "No"}</p>`;
-    plan.meals.forEach(m => {
-      output += `
-        <div class="meal-card">
-          <h3>${m.mealTime}: ${m.name}</h3>
-          <img src="${mealImages[m.name] || 'https://via.placeholder.com/300'}" alt="${m.name}">
-          <p class="macro">Calories: ${m.calories} | Protein: ${m.protein}g | Carbs: ${m.carbs}g | Fat: ${m.fat}g</p>
-        </div>
-      `;
-    });
-    output += `<h3>Daily Total: ${plan.totals.calories} kcal | Protein: ${plan.totals.protein}g | Carbs: ${plan.totals.carbs}g | Fat: ${plan.totals.fat}g</h3>`;
-    mealPlanDiv.innerHTML = output;
-  }
-
   function renderWeeklyMealPlans() {
     weeklyMealPlansDiv.innerHTML = "";
     if (!currentProfile) return;
@@ -847,7 +863,7 @@
             <div class="meal-card" style="margin-bottom:6px;">
               <h4 style="margin:4px 0;">${m.mealTime}: ${m.name}</h4>
               <img src="${mealImages[m.name] || 'https://via.placeholder.com/300'}" alt="${m.name}" style="max-height:100px;">
-              <p class="macro" style="margin:2px 0;">Calories: ${m.calories} | Protein: ${m.protein}g | Carbs: ${m.carbs}g | Fat: ${m.fat}g</p>
+              <p class="macro" style="margin:2px 0;">Calories: ${m.calories} | Protein: ${m.protein} g | Carbs: ${m.carbs} g | Fat: ${m.fat} g</p>
             </div>
           `;
         });
@@ -858,6 +874,7 @@
     });
   }
 
+  // Initialize
   function init() {
     loadProfiles();
     if (!currentProfile) {
