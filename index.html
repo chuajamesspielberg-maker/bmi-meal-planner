@@ -1,123 +1,482 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Personalized Meal Planner</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
-    h1, h2 { color: #333; }
-    .meal { background: white; padding: 10px; margin: 10px 0; border-radius: 8px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pinoy Meal Planner</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #0d0d0d;
+    color: #d4ffd4;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  /* Sidebar with profiles */
+  #sidebar {
+    background-color: #1a1a1a;
+    width: 260px;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  #sidebar h2 {
+    color: #39ff14;
+    text-align: center;
+    margin-top: 0;
+  }
+  #profileList {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+  #profileList li {
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: #262626;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0px 0px 5px rgba(57, 255, 20, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #a8ffb0;
+  }
+  #profileList li.active {
+    background-color: #39ff14;
+    color: black;
+  }
+  #profileList li:hover:not(.active) {
+    background-color: #2ecc71;
+    color: black;
+  }
+  #profileList button.delete-btn {
+    background: transparent;
+    border: none;
+    color: #ff4c4c;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+  }
+  
+  /* Main container */
+  .container {
+    flex: 1;
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  h1, h2 {
+    color: #39ff14;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  p {
+    margin: 10px 0 5px;
+  }
+  select, input[type=number], input[type=text] {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 12px;
+    font-size: 1em;
+  }
+  button {
+    background-color: #39ff14;
+    color: black;
+    border: none;
+    padding: 14px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+  }
+  button:hover {
+    background-color: #2ecc71;
+  }
+  .step {
+    display: none;
+    padding: 15px;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(57, 255, 20, 0.5);
+  }
+  .step.active {
+    display: block;
+  }
+  .meal-card {
+    background-color: #262626;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0px 0px 10px rgba(57, 255, 20, 0.2);
+  }
+  .meal-card h3 {
+    color: #39ff14;
+    margin: 6px 0;
+  }
+  .meal-card img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-top: 6px;
+  }
+  .macro {
+    font-size: 0.9em;
+    color: #a8ffb0;
+    margin-top: 4px;
+  }
+  #profileNameInput {
+    margin-bottom: 15px;
+  }
+  #regenerateBtn {
+    background-color: #ffbf00;
+    color: black;
+    margin-top: 0;
+  }
+  #regenerateBtn:hover {
+    background-color: #e6ac00;
+  }
+  /* Scrollbar for sidebar */
+  #sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+  #sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(57,255,20,0.5);
+    border-radius: 3px;
+  }
+</style>
 </head>
 <body>
 
-<h1>Meal Planner with BMI & Macros</h1>
+<!-- Sidebar -->
+<div id="sidebar">
+  <h2>Profiles</h2>
+  <ul id="profileList"></ul>
+  <button id="newProfileBtn">+ New Profile</button>
+</div>
 
-<div id="app"></div>
+<!-- Main container -->
+<div class="container">
+  <h1>Pinoy Meal Planner</h1>
+
+  <div id="stepContainer">
+    <!-- Step 0: Profile Name -->
+    <div id="step0" class="step">
+      <h2>Create Profile</h2>
+      <p>Enter client name:</p>
+      <input type="text" id="profileNameInput" placeholder="e.g. Juan Dela Cruz" />
+      <button onclick="saveNewProfile()">Save Profile</button>
+    </div>
+
+    <!-- Step 1: Goal -->
+    <div id="step1" class="step">
+      <h2>Step 1: Goal</h2>
+      <p>Select your goal:</p>
+      <select id="goal">
+        <option value="lose">Lose Weight</option>
+        <option value="gain">Gain Muscle</option>
+        <option value="maintain">Maintain Weight</option>
+      </select>
+      <button onclick="nextStep(2)">Next</button>
+    </div>
+
+    <!-- Step 2: Weight & Age -->
+    <div id="step2" class="step">
+      <h2>Step 2: Information</h2>
+      <p>Enter your weight (kg):</p>
+      <input type="number" id="weight" placeholder="e.g. 70" min="1" />
+      <p>Enter your age:</p>
+      <input type="number" id="age" placeholder="e.g. 30" min="1" />
+      <button onclick="nextStep(3)">Next</button>
+    </div>
+
+    <!-- Step 3: Meal Plan -->
+    <div id="step3" class="step">
+      <h2>Step 3: Meal Plan</h2>
+      <div id="mealPlan"></div>
+      <button id="generateBtn" onclick="generateMealPlan()">Generate Meal Plan</button>
+      <button id="regenerateBtn" style="display:none;" onclick="regenerateMealPlan()">Regenerate Meal Plan</button>
+    </div>
+  </div>
+</div>
 
 <script>
-const meals = {
-  breakfast: [
-    {name: "Omelette with veggies", cal: 300, protein: 20, carbs: 10, fat: 20},
-    {name: "Greek yogurt with berries", cal: 250, protein: 15, carbs: 20, fat: 8},
-    {name: "Oatmeal with banana", cal: 280, protein: 8, carbs: 50, fat: 5},
-    {name: "Smoothie with spinach & protein", cal: 220, protein: 18, carbs: 15, fat: 5},
-    {name: "Whole grain toast with peanut butter", cal: 320, protein: 12, carbs: 30, fat: 15}
-  ],
-  lunch: [
-    {name: "Grilled chicken with quinoa & broccoli", cal: 500, protein: 40, carbs: 45, fat: 15},
-    {name: "Tuna salad with olive oil dressing", cal: 400, protein: 35, carbs: 10, fat: 20},
-    {name: "Beef stir-fry with vegetables", cal: 480, protein: 38, carbs: 30, fat: 18},
-    {name: "Baked salmon with sweet potato", cal: 520, protein: 42, carbs: 35, fat: 20},
-    {name: "Turkey wrap with avocado", cal: 450, protein: 32, carbs: 40, fat: 15}
-  ],
-  dinner: [
-    {name: "Grilled fish with brown rice", cal: 450, protein: 35, carbs: 45, fat: 12},
-    {name: "Chicken breast with roasted veggies", cal: 420, protein: 38, carbs: 20, fat: 15},
-    {name: "Tofu stir-fry with rice noodles", cal: 400, protein: 20, carbs: 50, fat: 12},
-    {name: "Shrimp with garlic pasta", cal: 470, protein: 30, carbs: 55, fat: 15},
-    {name: "Beef and vegetable soup with bread", cal: 440, protein: 28, carbs: 50, fat: 12}
-  ],
-  snack: [
-    {name: "Protein bar", cal: 200, protein: 20, carbs: 20, fat: 6},
-    {name: "Apple with almond butter", cal: 180, protein: 4, carbs: 20, fat: 8},
-    {name: "Cottage cheese with pineapple", cal: 160, protein: 15, carbs: 10, fat: 5},
-    {name: "Mixed nuts", cal: 220, protein: 6, carbs: 8, fat: 18},
-    {name: "Boiled eggs", cal: 140, protein: 12, carbs: 2, fat: 10}
-  ]
-};
-
-function askUser() {
-  let height = parseFloat(prompt("Enter your height in cm:"));
-  let weight = parseFloat(prompt("Enter your weight in kg:"));
-  let bmi = (weight / ((height/100)**2)).toFixed(1);
-  alert("Your BMI is: " + bmi);
-
-  let goal = prompt("Enter your goal: 'lose', 'maintain', or 'gain':").toLowerCase();
-  let allergies = prompt("Enter any allergies (comma-separated):").toLowerCase().split(",").map(a => a.trim());
-
-  let calorieTarget;
-  if(goal === "lose") calorieTarget = weight * 25;
-  else if(goal === "gain") calorieTarget = weight * 35;
-  else calorieTarget = weight * 30;
-
-  let macros = {
-    protein: (weight * 2), // grams
-    carbs: (calorieTarget * 0.5 / 4).toFixed(0),
-    fat: (calorieTarget * 0.25 / 9).toFixed(0)
+  /* Starter Filipino-friendly meal set with built-in base64 images for fast loading */
+  const mealImages = {
+    "Adobo Chicken": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2Ht6kAAAABnRSTlMAAAAAAABupgeRAAAANUlEQVR4nO3BMQEAAAgDoJvcva+GET3BkDOmTNnTq1ChQoUKFChQoUKFChQoUKFChQoUKFCk6hPmighOTMAAAAASUVORK5CYII=",
+    "Sinigang na Baboy": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2Ht6kAAAABnRSTlMAAAAAAABupgeRAAAAJklEQVR4nO3BMQEAAAwCoNm/9EngAAAAAAAAAAAAAAAAAAAAAAAAAAAALgBg+QAAeeMiH7AAAAAASUVORK5CYII=",
+    "Pancit Canton": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2Ht6kAAAABnRSTlMAAAAAAABupgeRAAAAIklEQVR4nO3BMQEAAAgCoNm/qVESAAAAAAAAAAAAAAAAAAAAAAAAAAA8BjB8u4AAu28wswAAAABJRU5ErkJggg==",
+    "Laing": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2Ht6kAAAABnRSTlMAAAAAAABupgeRAAAAJElEQVR4nO3BMQEAAAgDoJvcva+GET3BkDOmTNnTq1ChQoUKFChQoUKFChQoUKFChQoUKFCk6hM+qhxGTMAAAAASUVORK5CYII=",
+    "Lechon Kawali": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAIAAAD2Ht6kAAAABnRSTlMAAAAAAABupgeRAAAALUlEQVR4nO3BMQEAAAgCoNm/9EntnIy2nTq1ChQoUKFChQoUKFChQoUKFChQoUKFCkKhn6UGiIAAAAASUVORK5CYII=",
+    "Herbalife Formula 1 Shake": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD",
+    "Grilled Chicken Breast": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD",
+    "Oatmeal with Banana": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD",
+    "Tuna Salad": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD",
+    "Beef Stir Fry": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD"
   };
 
-  generateMealPlan(goal, allergies, calorieTarget, macros);
-}
+  const meals = [
+    { name: "Adobo Chicken", calories: 320, protein: 30, carbs: 10, fat: 18 },
+    { name: "Sinigang na Baboy", calories: 280, protein: 28, carbs: 15, fat: 12 },
+    { name: "Pancit Canton", calories: 350, protein: 22, carbs: 45, fat: 14 },
+    { name: "Laing", calories: 300, protein: 12, carbs: 20, fat: 22 },
+    { name: "Lechon Kawali", calories: 400, protein: 35, carbs: 0, fat: 30 }
+  ];
 
-function filterMeals(list, allergies) {
-  return list.filter(meal => !allergies.some(allergy => meal.name.toLowerCase().includes(allergy)));
-}
+  const extraMeal = { name: "Herbalife Formula 1 Shake", calories: 200, protein: 9, carbs: 25, fat: 3 };
 
-function getRandomMeals(mealList, days=7) {
-  let result = [];
-  for(let i=0; i<days; i++) {
-    result.push(mealList[Math.floor(Math.random() * mealList.length)]);
-  }
-  return result;
-}
+  /* State & DOM elements */
+  let profiles = {};
+  let currentProfile = null;
+  let currentStep = 0;
 
-function generateMealPlan(goal, allergies, calorieTarget, macros) {
-  let app = document.getElementById("app");
-  app.innerHTML = `<h2>Target: ${calorieTarget} kcal/day | Protein: ${macros.protein}g | Carbs: ${macros.carbs}g | Fat: ${macros.fat}g</h2>`;
+  const profileListEl = document.getElementById("profileList");
+  const containerSteps = document.querySelectorAll(".step");
 
-  let days = 7;
-  let bList = filterMeals(meals.breakfast, allergies);
-  let lList = filterMeals(meals.lunch, allergies);
-  let dList = filterMeals(meals.dinner, allergies);
-  let sList = filterMeals(meals.snack, allergies);
+  const profileNameInput = document.getElementById("profileNameInput");
+  const goalSelect = document.getElementById("goal");
+  const weightInput = document.getElementById("weight");
+  const ageInput = document.getElementById("age");
+  const mealPlanDiv = document.getElementById("mealPlan");
+  const generateBtn = document.getElementById("generateBtn");
+  const regenerateBtn = document.getElementById("regenerateBtn");
+  const newProfileBtn = document.getElementById("newProfileBtn");
 
-  let weekPlan = [];
-
-  for(let i=0; i<days; i++) {
-    let breakfast = goal === "lose" ? {name: "Herbalife Formula 1 Shake", cal: 200, protein: 18, carbs: 20, fat: 3} : bList[Math.floor(Math.random()*bList.length)];
-    let lunch = lList[Math.floor(Math.random()*lList.length)];
-    let dinner = goal === "lose" ? {name: "Herbalife Formula 1 Shake", cal: 200, protein: 18, carbs: 20, fat: 3} : dList[Math.floor(Math.random()*dList.length)];
-    let snack = sList[Math.floor(Math.random()*sList.length)];
-
-    let totalCal = breakfast.cal + lunch.cal + dinner.cal + snack.cal;
-    let totalProtein = breakfast.protein + lunch.protein + dinner.protein + snack.protein;
-    let totalCarbs = breakfast.carbs + lunch.carbs + dinner.carbs + snack.carbs;
-    let totalFat = breakfast.fat + lunch.fat + dinner.fat + snack.fat;
-
-    weekPlan.push({day: i+1, meals: [breakfast, lunch, dinner, snack], totals: {cal: totalCal, protein: totalProtein, carbs: totalCarbs, fat: totalFat}});
-  }
-
-  weekPlan.forEach(day => {
-    app.innerHTML += `<div class="meal"><h3>Day ${day.day}</h3>`;
-    day.meals.forEach(m => {
-      app.innerHTML += `<p><b>${m.name}</b> - ${m.cal} kcal | P:${m.protein}g C:${m.carbs}g F:${m.fat}g</p>`;
-    });
-    app.innerHTML += `<p><b>Daily Total:</b> ${day.totals.cal} kcal | P:${day.totals.protein}g C:${day.totals.carbs}g F:${day.totals.fat}g</p></div>`;
+  newProfileBtn.addEventListener("click", () => {
+    currentProfile = null;
+    currentStep = 0;
+    clearInputs();
+    showStep(0);
+    setActiveProfile(null);
   });
-}
 
-askUser();
+  function clearInputs() {
+    profileNameInput.value = "";
+    goalSelect.value = "lose";
+    weightInput.value = "";
+    ageInput.value = "";
+    mealPlanDiv.innerHTML = "";
+    regenerateBtn.style.display = "none";
+  }
+
+  /* Load profiles from localStorage */
+  function loadProfiles() {
+    const saved = localStorage.getItem("pinoyMealProfiles");
+    profiles = saved ? JSON.parse(saved) : {};
+    renderProfileList();
+  }
+
+  /* Save profiles to localStorage */
+  function saveProfiles() {
+    localStorage.setItem("pinoyMealProfiles", JSON.stringify(profiles));
+  }
+
+  /* Render list of profiles in sidebar */
+  function renderProfileList() {
+    profileListEl.innerHTML = "";
+    for (const name in profiles) {
+      const li = document.createElement("li");
+      li.textContent = name;
+      li.title = `Client: ${name}`;
+      li.onclick = () => loadProfile(name);
+      if (currentProfile === name) {
+        li.classList.add("active");
+      }
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "X";
+      delBtn.className = "delete-btn";
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete profile "${name}"? This cannot be undone.`)) {
+          delete profiles[name];
+          if (currentProfile === name) {
+            currentProfile = null;
+            clearInputs();
+            showStep(0);
+          }
+          saveProfiles();
+          renderProfileList();
+        }
+      };
+
+      li.appendChild(delBtn);
+      profileListEl.appendChild(li);
+    }
+  }
+
+  /* Show the given step */
+  function showStep(step) {
+    containerSteps.forEach(s => s.classList.remove("active"));
+    document.getElementById(`step${step}`).classList.add("active");
+    currentStep = step;
+  }
+
+  /* Move to next step */
+  function nextStep(step) {
+    if (step === 1 && !profileNameInput.value.trim()) {
+      alert("Please enter a valid client name.");
+      return;
+    }
+    if (step === 2 && (weightInput.value <= 0 || ageInput.value <= 0)) {
+      alert("Please enter valid weight and age.");
+      return;
+    }
+    showStep(step);
+  }
+
+  /* Save new profile */
+  function saveNewProfile() {
+    const name = profileNameInput.value.trim();
+    if (!name) {
+      alert("Please enter a valid client name.");
+      return;
+    }
+    if (profiles[name]) {
+      if (!confirm(`Profile "${name}" already exists. Overwrite?`)) return;
+    }
+    profiles[name] = {
+      goal: "lose",
+      weight: null,
+      age: null,
+      mealPlans: []
+    };
+    currentProfile = name;
+    saveProfiles();
+    renderProfileList();
+    goalSelect.value = "lose";
+    weightInput.value = "";
+    ageInput.value = "";
+    showStep(1);
+    setActiveProfile(name);
+  }
+
+  /* Load profile data into inputs */
+  function loadProfile(name) {
+    const p = profiles[name];
+    if (!p) return;
+    currentProfile = name;
+    setActiveProfile(name);
+    profileNameInput.value = name;
+    goalSelect.value = p.goal || "lose";
+    weightInput.value = p.weight || "";
+    ageInput.value = p.age || "";
+    showStep(1);
+
+    // Show the last meal plan if exists
+    if (p.mealPlans && p.mealPlans.length > 0) {
+      displayMealPlan(p.mealPlans[p.mealPlans.length - 1]);
+      regenerateBtn.style.display = "inline-block";
+    } else {
+      mealPlanDiv.innerHTML = "";
+      regenerateBtn.style.display = "none";
+    }
+  }
+
+  /* Highlight active profile in list */
+  function setActiveProfile(name) {
+    currentProfile = name;
+    renderProfileList();
+  }
+
+  /* Generate meal plan */
+  function generateMealPlan() {
+    if (!currentProfile) {
+      alert("Please create or select a profile first.");
+      return;
+    }
+    const goal = goalSelect.value;
+    const weight = parseFloat(weightInput.value);
+    const age = parseInt(ageInput.value);
+    if (!weight || weight <= 0 || !age || age <= 0) {
+      alert("Please enter valid weight and age.");
+      return;
+    }
+
+    let caloriesNeeded = weight * (goal === "lose" ? 25 : goal === "gain" ? 35 : 30);
+
+    let mealPlan = [];
+
+    if (goal === "lose") {
+      mealPlan.push(extraMeal);
+    }
+
+    let shuffled = [...meals].sort(() => 0.5 - Math.random());
+    mealPlan = mealPlan.concat(shuffled.slice(0, 3));
+
+    if (goal === "lose") {
+      mealPlan.push(extraMeal);
+    }
+
+    let totalCalories = mealPlan.reduce((sum, m) => sum + m.calories, 0);
+    let totalProtein = mealPlan.reduce((sum, m) => sum + m.protein, 0);
+    let totalCarbs = mealPlan.reduce((sum, m) => sum + m.carbs, 0);
+    let totalFat = mealPlan.reduce((sum, m) => sum + m.fat, 0);
+
+    const plan = {
+      date: new Date().toISOString(),
+      goal,
+      weight,
+      age,
+      caloriesNeeded,
+      meals: mealPlan,
+      totals: {
+        calories: totalCalories,
+        protein: totalProtein,
+        carbs: totalCarbs,
+        fat: totalFat
+      }
+    };
+
+    // Save to profile
+    profiles[currentProfile].goal = goal;
+    profiles[currentProfile].weight = weight;
+    profiles[currentProfile].age = age;
+    profiles[currentProfile].mealPlans.push(plan);
+    saveProfiles();
+
+    displayMealPlan(plan);
+    regenerateBtn.style.display = "inline-block";
+    showStep(3);
+  }
+
+  /* Regenerate meal plan for current profile without deleting */
+  function regenerateMealPlan() {
+    generateMealPlan();
+  }
+
+  /* Display meal plan in UI */
+  function displayMealPlan(plan) {
+    let output = `<h3>Target Calories: ${plan.caloriesNeeded} kcal</h3>`;
+    plan.meals.forEach(m => {
+      output += `
+        <div class="meal-card">
+          <h3>${m.name}</h3>
+          <img src="${mealImages[m.name] || 'https://via.placeholder.com/300'}" alt="${m.name}">
+          <p class="macro">Calories: ${m.calories} | Protein: ${m.protein}g | Carbs: ${m.carbs}g | Fat: ${m.fat}g</p>
+        </div>
+      `;
+    });
+    output += `<h3>Daily Total: ${plan.totals.calories} kcal | Protein: ${plan.totals.protein}g | Carbs: ${plan.totals.carbs}g | Fat: ${plan.totals.fat}g</h3>`;
+    mealPlanDiv.innerHTML = output;
+  }
+
+  /* Initialize app */
+  function init() {
+    loadProfiles();
+    if (!currentProfile) {
+      showStep(0);
+    }
+  }
+
+  init();
 </script>
-
 </body>
 </html>
