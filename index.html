@@ -18,7 +18,6 @@
     height: 100vh;
     overflow: hidden;
   }
-  /* Sidebar with profiles and past plans */
   #sidebar {
     background-color: #1a1a1a;
     width: 280px;
@@ -86,7 +85,6 @@
     padding: 12px;
   }
 
-  /* Main container */
   .container {
     flex: 1;
     max-width: 700px;
@@ -183,7 +181,6 @@
     justify-content: space-between;
   }
 
-  /* Scrollbar for sidebar */
   #sidebar::-webkit-scrollbar {
     width: 6px;
   }
@@ -192,7 +189,6 @@
     border-radius: 3px;
   }
 
-  /* Responsive: stack on narrow screens with scrolling */
   @media (max-width: 700px) {
     body {
       flex-direction: column;
@@ -247,7 +243,6 @@
     }
   }
 
-  /* Weekly Meal Plans container */
   #weeklyMealPlans {
     margin-top: 20px;
   }
@@ -270,21 +265,18 @@
 </head>
 <body>
 
-<!-- Sidebar -->
 <div id="sidebar">
   <h2>Profiles</h2>
   <ul id="profileList" aria-label="List of profiles"></ul>
   <h2 id="profileTitle" style="display:none;">Past Meal Plans</h2>
   <ul id="planList" aria-label="List of past meal plans"></ul>
-  <button id="newProfileBtn">+ New Profile</button>
+  <button id="newProfileBtn" aria-label="Create new profile">+ New Profile</button>
 </div>
 
-<!-- Main container -->
 <div class="container">
   <h1>Pinoy Meal Planner</h1>
 
   <div id="stepContainer" role="region" aria-live="polite">
-    <!-- Step 0: Profile Name -->
     <div id="step0" class="step" tabindex="0">
       <h2>Create Profile</h2>
       <p>Enter client name:</p>
@@ -292,7 +284,6 @@
       <button onclick="saveNewProfile()" aria-label="Save profile">Save Profile</button>
     </div>
 
-    <!-- Step 1: Goal -->
     <div id="step1" class="step" tabindex="0">
       <h2>Step 1: Goal</h2>
       <p>Select your goal:</p>
@@ -304,7 +295,6 @@
       <button onclick="nextStep(2)" aria-label="Next to information input">Next</button>
     </div>
 
-    <!-- Step 2: Weight, Height & Age -->
     <div id="step2" class="step" tabindex="0">
       <h2>Step 2: Information</h2>
       <p>Enter your weight (kg):</p>
@@ -313,31 +303,35 @@
       <input type="number" id="height" placeholder="e.g. 170" min="50" max="300" step="any" aria-label="Height in centimeters"/>
       <p>Enter your age:</p>
       <input type="number" id="age" placeholder="e.g. 30" min="1" aria-label="Age in years" />
-      <button onclick="nextStep(3)" aria-label="Next to allergies input">Next</button>
+      <button onclick="nextStep(3)" aria-label="Next to target weight input">Next</button>
     </div>
 
-    <!-- Step 3: Allergies -->
     <div id="step3" class="step" tabindex="0">
-      <h2>Step 3: Allergies</h2>
+      <h2>Step 3: Target Weight</h2>
+      <p>Enter your target weight (kg):</p>
+      <input type="number" id="targetWeight" placeholder="e.g. 65" min="1" step="any" aria-label="Target Weight in kilograms" />
+      <button onclick="nextStep(4)" aria-label="Next to allergies input">Next</button>
+    </div>
+
+    <div id="step4" class="step" tabindex="0">
+      <h2>Step 4: Allergies</h2>
       <p>Enter any allergies (comma separated), or leave blank if none:</p>
       <textarea id="allergyInput" placeholder="e.g. nuts, shellfish" aria-label="Client allergies input"></textarea>
-      <button onclick="nextStep(4)" aria-label="Next to rice preference">Next</button>
+      <button onclick="nextStep(5)" aria-label="Next to rice preference">Next</button>
     </div>
 
-    <!-- Step 4: Rice preference -->
-    <div id="step4" class="step" tabindex="0">
-      <h2>Step 4: Rice Preference</h2>
+    <div id="step5" class="step" tabindex="0">
+      <h2>Step 5: Rice Preference</h2>
       <p>Can the client have meals with rice?</p>
       <select id="ricePref" aria-label="Rice preference select">
         <option value="yes">Yes, with rice</option>
         <option value="no">No rice</option>
       </select>
-      <button onclick="nextStep(5)" aria-label="Next to meal plan generation">Next</button>
+      <button onclick="nextStep(6)" aria-label="Next to meal plan generation">Next</button>
     </div>
 
-    <!-- Step 5: Meal Plan -->
-    <div id="step5" class="step" tabindex="0">
-      <h2>Step 5: Meal Plan</h2>
+    <div id="step6" class="step" tabindex="0">
+      <h2>Step 6: Meal Plan</h2>
       <div id="mealPlan"></div>
       <div class="button-row">
         <button id="generateBtn" onclick="generateMealPlan()">Generate Meal Plan</button>
@@ -349,7 +343,7 @@
 </div>
 
 <script>
-  // Meals with allergens and rice info (no noodles included)
+  // Meals without noodles, with allergens and rice info
   const meals = [
     { name: "Adobo Chicken", calories: 320, protein: 30, carbs: 10, fat: 18, allergens: [], containsRice: false },
     { name: "Sinigang na Baboy", calories: 280, protein: 28, carbs: 15, fat: 12, allergens: [], containsRice: false },
@@ -377,24 +371,23 @@
     "Herbalife Formula 1 Shake": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD"
   };
 
-  // State variables
   let profiles = {};
   let currentProfile = null;
   let currentStep = 0;
   let currentAllergies = [];
   let riceAllowed = true;
 
-  // DOM elements
   const profileListEl = document.getElementById("profileList");
   const planListEl = document.getElementById("planList");
   const profileTitleEl = document.getElementById("profileTitle");
-
   const containerSteps = document.querySelectorAll(".step");
+
   const profileNameInput = document.getElementById("profileNameInput");
   const goalSelect = document.getElementById("goal");
   const weightInput = document.getElementById("weight");
   const heightInput = document.getElementById("height");
   const ageInput = document.getElementById("age");
+  const targetWeightInput = document.getElementById("targetWeight");
   const allergyInput = document.getElementById("allergyInput");
   const ricePrefSelect = document.getElementById("ricePref");
   const mealPlanDiv = document.getElementById("mealPlan");
@@ -402,7 +395,6 @@
   const newProfileBtn = document.getElementById("newProfileBtn");
   const weeklyMealPlansDiv = document.getElementById("weeklyMealPlans");
 
-  // Initialization
   newProfileBtn.addEventListener("click", () => {
     currentProfile = null;
     currentAllergies = [];
@@ -421,6 +413,7 @@
     weightInput.value = "";
     heightInput.value = "";
     ageInput.value = "";
+    targetWeightInput.value = "";
     allergyInput.value = "";
     ricePrefSelect.value = "yes";
     mealPlanDiv.innerHTML = "";
@@ -486,6 +479,7 @@
     profileTitleEl.style.display = "block";
     profileTitleEl.textContent = Past Meal Plans for ${currentProfile};
     const plans = profiles[currentProfile].mealPlans || [];
+
     plans.forEach((plan, i) => {
       const li = document.createElement("li");
       const planDate = new Date(plan.date);
@@ -497,10 +491,15 @@
         li.classList.add("active");
         displayMealPlan(plan);
         regenerateBtn.style.display = "inline-block";
-        showStep(5);
+        showStep(6);
       };
       planListEl.appendChild(li);
     });
+
+    // Highlight last created meal plan by default
+    if (planListEl.firstChild) {
+      planListEl.firstChild.classList.add("active");
+    }
   }
 
   function showStep(step) {
@@ -525,6 +524,13 @@
         return;
       }
     }
+    if(step === 4) {
+      const targetWeight = parseFloat(targetWeightInput.value);
+      if(!targetWeight || targetWeight <= 0) {
+        alert("Please enter a valid target weight.");
+        return;
+      }
+    }
     showStep(step);
   }
 
@@ -542,6 +548,7 @@
       weight: null,
       height: null,
       age: null,
+      targetWeight: null,
       allergies: [],
       riceAllowed: true,
       mealPlans: []
@@ -553,6 +560,7 @@
     weightInput.value = "";
     heightInput.value = "";
     ageInput.value = "";
+    targetWeightInput.value = "";
     allergyInput.value = "";
     ricePrefSelect.value = "yes";
     showStep(1);
@@ -572,6 +580,7 @@
     weightInput.value = p.weight || "";
     heightInput.value = p.height || "";
     ageInput.value = p.age || "";
+    targetWeightInput.value = p.targetWeight || "";
     allergyInput.value = (p.allergies || []).join(", ");
     ricePrefSelect.value = (p.riceAllowed === false) ? "no" : "yes";
     currentAllergies = p.allergies || [];
@@ -645,9 +654,10 @@
     const weight = parseFloat(weightInput.value);
     const height = parseFloat(heightInput.value);
     const age = parseInt(ageInput.value);
+    const targetWeight = parseFloat(targetWeightInput.value);
 
-    if (!weight || weight <= 0 || !height || height <= 0 || !age || age <= 0) {
-      alert("Please enter valid weight, height, and age.");
+    if (!weight || weight <= 0 || !height || height <= 0 || !age || age <= 0 || !targetWeight || targetWeight <= 0) {
+      alert("Please enter valid inputs.");
       return;
     }
 
@@ -661,58 +671,93 @@
     profiles[currentProfile].weight = weight;
     profiles[currentProfile].height = height;
     profiles[currentProfile].age = age;
+    profiles[currentProfile].targetWeight = targetWeight;
     profiles[currentProfile].allergies = currentAllergies;
     profiles[currentProfile].riceAllowed = riceAllowed;
 
-    let caloriesNeeded = weight * (goal === "lose" ? 25 : goal === "gain" ? 35 : 30);
+    // Calculate maintenance calories — we use average factor to improve calculation (simplified)
+    const maintenanceCalories = weight * (goal === "lose" ? 30 : goal === "gain" ? 35 : 32);
 
-    // Filter meals according to allergy and rice preference
-    let availableMeals = filterMeals(currentAllergies, riceAllowed);
-
-    // Need 3 distinct meals excluding Herbalife shake
-    let mealPlanCandidates = [];
-    const maxAttempts = 15;
-    for(let attempt=0; attempt<maxAttempts; attempt++) {
-      let shuffled = [...availableMeals].sort(() => 0.5 - Math.random());
-      // Exclude Herbalife in snack/lunch picks (since Herbalife fixed for breakfast/dinner)
-      let filteredShuffled = shuffled.filter(m => m.name !== extraMeal.name);
-      if(filteredShuffled.length >= 3){
-        mealPlanCandidates = filteredShuffled.slice(0,3);
-        break;
-      }
+    // Determine calorie target (deficit or surplus 400 cal)
+    const calorieAdjustment = 400;
+    let calorieTarget;
+    if (targetWeight < weight) {
+      calorieTarget = Math.max(1200, maintenanceCalories - calorieAdjustment);
+    } else if (targetWeight > weight) {
+      calorieTarget = maintenanceCalories + calorieAdjustment;
+    } else {
+      calorieTarget = maintenanceCalories;
     }
-    if(mealPlanCandidates.length < 3) {
-      alert("Not enough suitable meals to generate a healthy meal plan given allergies and rice preference. Please adjust inputs.");
+
+    // Filter meals
+    let availableMeals = filterMeals(currentAllergies, true);
+    const riceMeals = availableMeals.filter(m => m.containsRice);
+    const nonRiceMeals = availableMeals.filter(m => !m.containsRice);
+
+    // Pick one rice meal if allowed and available
+    let riceMealIncluded = null;
+    if (riceAllowed && riceMeals.length > 0) {
+      const shuffledRice = [...riceMeals].sort(() => 0.5 - Math.random());
+      riceMealIncluded = shuffledRice[0];
+    }
+
+    // Prepare candidates for snack/lunch excluding Herbalife and rice meal if included
+    let snackLunchCandidates = nonRiceMeals.filter(m => m.name !== extraMeal.name);
+    if (riceMealIncluded) {
+      snackLunchCandidates = snackLunchCandidates.filter(m => m.name !== riceMealIncluded.name);
+    }
+
+    if (snackLunchCandidates.length < 2) {
+      alert("Not enough suitable meals to generate a healthy plan with your allergies and rice preference. Please adjust.");
       return;
     }
 
-    // Build meal plan: Breakfast and Dinner Herbalife, AM Snack, Lunch, PM Snack from candidates
+    // Pick AM snack and PM snack randomly
+    const shuffledSnacks = [...snackLunchCandidates].sort(() => 0.5 - Math.random());
+    const amSnack = shuffledSnacks[0];
+    const pmSnack = shuffledSnacks[1];
+
+    // Determine lunch meal
+    let lunch = null;
+    if (riceMealIncluded) {
+      lunch = riceMealIncluded;
+    } else {
+      const lunchCandidates = snackLunchCandidates.filter(m => m.name !== amSnack.name && m.name !== pmSnack.name);
+      if (lunchCandidates.length === 0) {
+        alert("Not enough suitable meals for lunch after selecting snacks. Please adjust.");
+        return;
+      }
+      lunch = [...lunchCandidates].sort(() => 0.5 - Math.random())[0];
+    }
+
+    // Compose meal plan: breakfast & dinner Herbalife Shake
     const mealPlan = [
       {...extraMeal, mealTime: "Breakfast"},
-      {...mealPlanCandidates[0], mealTime: "AM Snack"},
-      {...mealPlanCandidates[1], mealTime: "Lunch"},
-      {...mealPlanCandidates[2], mealTime: "PM Snack"},
+      {...amSnack, mealTime: "AM Snack"},
+      {...lunch, mealTime: "Lunch"},
+      {...pmSnack, mealTime: "PM Snack"},
       {...extraMeal, mealTime: "Dinner"},
     ];
 
-    // Totals
-    let totalCalories = mealPlan.reduce((sum,m) => sum + m.calories,0);
-    let totalProtein = mealPlan.reduce((sum,m) => sum + m.protein,0);
-    let totalCarbs= mealPlan.reduce((sum,m) => sum + m.carbs,0);
-    let totalFat = mealPlan.reduce((sum,m) => sum + m.fat,0);
+    // Calculate totals
+    let totalCalories = mealPlan.reduce((sum,m) => sum + m.calories, 0);
+    let totalProtein = mealPlan.reduce((sum,m) => sum + m.protein, 0);
+    let totalCarbs = mealPlan.reduce((sum,m) => sum + m.carbs, 0);
+    let totalFat = mealPlan.reduce((sum,m) => sum + m.fat, 0);
 
     let bmi = calculateBMI(weight, height).toFixed(1);
-    let targetMacros = calculateMacros(caloriesNeeded, weight, goal);
+    let targetMacros = calculateMacros(calorieTarget, weight, goal);
 
-    // Save plan with current date time
+    // Save plan with timestamp
     const plan = {
       date: new Date().toISOString(),
       goal,
       weight,
       height,
       age,
+      targetWeight,
       bmi,
-      caloriesNeeded,
+      caloriesNeeded: calorieTarget,
       targetMacros,
       allergies: currentAllergies,
       riceAllowed,
@@ -728,13 +773,12 @@
     profiles[currentProfile].mealPlans.push(plan);
     saveProfiles();
 
-    // Update sidebar with meal plans and weekly view
     renderPlanList();
     renderWeeklyMealPlans();
 
     displayMealPlan(plan);
     regenerateBtn.style.display = "inline-block";
-    showStep(5);
+    showStep(6);
   }
 
   function regenerateMealPlan() {
@@ -743,11 +787,12 @@
 
   function displayMealPlan(plan) {
     let output = <h3>Target Calories: ${plan.caloriesNeeded.toFixed(0)} kcal</h3>;
+    output += <p><strong>Current Weight:</strong> ${plan.weight.toFixed(1)} kg</p>;
+    output += <p><strong>Target Weight:</strong> ${plan.targetWeight.toFixed(1)} kg</p>;
     output += <p><strong>BMI:</strong> ${plan.bmi} kg/m²</p>;
     output += <p><strong>Target Macros:</strong> Protein: ${plan.targetMacros.protein}g | Carbs: ${plan.targetMacros.carbs}g | Fat: ${plan.targetMacros.fat}g</p>;
-    output += <p><strong>Allergies:</strong> ${plan.allergies.length ? plan.allergies.join(", ") : "None"}</p>;
+    output += <p><strong>Allergies:</strong> ${plan.allergies.length > 0 ? plan.allergies.join(", ") : "None"}</p>;
     output += <p><strong>Rice Allowed:</strong> ${plan.riceAllowed ? "Yes" : "No"}</p>;
-
     plan.meals.forEach(m => {
       output += `
         <div class="meal-card">
@@ -757,19 +802,18 @@
         </div>
       `;
     });
-
     output += <h3>Daily Total: ${plan.totals.calories} kcal | Protein: ${plan.totals.protein}g | Carbs: ${plan.totals.carbs}g | Fat: ${plan.totals.fat}g</h3>;
     mealPlanDiv.innerHTML = output;
   }
 
-  // Group meal plans by day (date only) and show up to 7 days in weeklyMealPlansDiv
+  // Show meal plans grouped by day (up to 7 most recent days)
   function renderWeeklyMealPlans() {
     weeklyMealPlansDiv.innerHTML = "";
     if(!currentProfile) return;
     const plans = profiles[currentProfile].mealPlans || [];
     if(plans.length === 0) return;
 
-    // Group by YYYY-MM-DD date string
+    // Group meal plans by date
     const groups = {};
     plans.forEach(p => {
       const day = p.date.substring(0,10);
@@ -777,8 +821,8 @@
       groups[day].push(p);
     });
 
-    // Sort dates descending (most recent first)
-    const sortedDays = Object.keys(groups).sort((a,b)=> b.localeCompare(a));
+    // Sort days descending (newest first)
+    const sortedDays = Object.keys(groups).sort((a,b) => b.localeCompare(a));
 
     // Show up to 7 days
     sortedDays.slice(0,7).forEach(day => {
