@@ -333,7 +333,7 @@
 </div>
 
 <script>
-  // Snack meals: light, easy, not viands
+  // Snack meals (light snacks)
   const snackMeals = [
     { name: "Fresh Mango", calories: 60, protein: 1, carbs: 15, fat: 0, allergens: [], containsRice: false },
     { name: "Boiled Egg", calories: 78, protein: 6, carbs: 1, fat: 5, allergens: [], containsRice: false },
@@ -378,7 +378,7 @@
   let currentAllergies = [];
   let riceAllowed = true;
 
-  // DOM refs
+  // DOM refs...
   const profileListEl = document.getElementById("profileList");
   const planListEl = document.getElementById("planList");
   const profileTitleEl = document.getElementById("profileTitle");
@@ -741,7 +741,6 @@
       calorieTarget = maintenanceCalories;
     }
 
-    // Filter snack meals, viand meals, rice meals
     const filteredSnackMeals = filterMeals(currentAllergies, riceAllowed, snackMeals);
     const filteredViandMeals = filterMeals(currentAllergies, riceAllowed, viandMeals);
     const filteredRiceMeals = filterMeals(currentAllergies, riceAllowed, riceMeals);
@@ -759,7 +758,7 @@
       return;
     }
 
-    // Pick AM and PM snack, no repeats
+    // Pick AM and PM snacks
     const shuffledSnacks = [...filteredSnackMeals].sort(() => 0.5 - Math.random());
     const amSnack = shuffledSnacks[0];
     const pmSnack = shuffledSnacks[1];
@@ -768,7 +767,7 @@
     const lunchViand = filteredViandMeals.sort(() => 0.5 - Math.random())[0];
     let lunchRice = riceAllowed ? filteredRiceMeals.sort(() => 0.5 - Math.random())[0] : null;
 
-    // Compose lunch as combined meal
+    // Compose lunch meal combined "Viand + Rice"
     const lunch = {
       name: lunchViand.name + (lunchRice ? " + " + lunchRice.name : ""),
       calories: lunchViand.calories + (lunchRice ? lunchRice.calories : 0),
@@ -780,7 +779,6 @@
       mealTime: "Lunch"
     };
 
-    // Full meal plan array
     const mealPlan = [
       {...extraMeal, mealTime: "Breakfast"},
       {...amSnack, mealTime: "AM Snack"},
@@ -789,7 +787,6 @@
       {...extraMeal, mealTime: "Dinner"},
     ];
 
-    // Calculate totals
     let totalCalories = mealPlan.reduce((sum, m) => sum + m.calories, 0);
     let totalProtein = mealPlan.reduce((sum, m) => sum + m.protein, 0);
     let totalCarbs = mealPlan.reduce((sum, m) => sum + m.carbs, 0);
@@ -874,7 +871,6 @@
     });
   }
 
-  // Initialize
   function init() {
     loadProfiles();
     if (!currentProfile) {
