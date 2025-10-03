@@ -1,304 +1,299 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <title>Pinoy 14-Day Meal Planner</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-    h1 { color: #333; }
-    label { display: block; margin-top: 10px; }
-    input, select { margin-top: 5px; padding: 5px; }
-    button { margin-top: 10px; padding: 5px 12px; }
-    pre { background: #fff; padding: 15px; border: 1px solid #ddd; white-space: pre-wrap; }
-    .profile-box { margin-bottom: 15px; }
-  </style>
+<meta charset="UTF-8">
+<title>14-Day Pinoy Meal Plan Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+  h1 { color: #2c3e50; }
+  .box { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; 
+         box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+  label { display: block; margin: 6px 0; }
+  input, select { margin-left: 10px; }
+  button { margin: 5px; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; background: #3498db; color: #fff; }
+  button:hover { background: #2980b9; }
+  table { border-collapse: collapse; width: 100%; margin-top: 15px;}
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px;}
+  th { background: #ecf0f1;}
+  .row { display:flex; gap:10px; }
+</style>
 </head>
 <body>
-  <h1>Pinoy 14-Day Meal Planner (PDF + Edit)</h1>
 
-  <!-- Profile Management -->
-  <div>
-    <h3>Add / Edit Profile</h3>
-    <label>Name: <input id="pname" type="text" required></label>
-    <label>Age: <input id="age" type="number" required></label>
-    <label>Weight (kg): <input id="weight" type="number" required></label>
-    <label>Height (cm): <input id="height" type="number" required></label>
-    <label>Gender:
-      <select id="gender" required>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-      </select>
-    </label>
-    <label>Activity Level:
-      <select id="activity" required>
-        <option value="sedentary">Sedentary (little or no exercise)</option>
-        <option value="light">Lightly Active (light exercise/sports 1-3 days/week)</option>
-        <option value="moderate">Moderately Active (moderate exercise 3-5 days/week)</option>
-        <option value="active">Active (hard exercise 6-7 days/week)</option>
-        <option value="veryActive">Very Active (physical job or intense exercise)</option>
-      </select>
-    </label>
-    <button onclick="addProfile()">Save Profile</button>
-  </div>
+<h1>14-Day Pinoy Meal Plan Generator</h1>
 
-  <!-- Profile Selection -->
-  <div class="profile-box">
-    <h3>Select Profile</h3>
-    <select id="profileSelect" onchange="loadProfile()"></select>
-    <button onclick="editProfile()">Edit</button>
-    <button onclick="deleteProfile()">Delete</button>
-  </div>
+<div class="box">
+  <h3>Client Profile</h3>
+  <label>Name: <input id="name"></label>
+  <label>Age: <input id="age" type="number"></label>
+  <label>Weight (kg): <input id="weight" type="number"></label>
+  <label>Height (cm): <input id="height" type="number"></label>
+  <label>Gender:
+    <select id="gender">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+  </label>
+  <label>Activity Level:
+    <select id="activity">
+      <option value="sedentary">Sedentary</option>
+      <option value="light">Light</option>
+      <option value="moderate">Moderate</option>
+      <option value="active">Active</option>
+      <option value="veryActive">Very Active</option>
+    </select>
+  </label>
+  <label>Default Target Goal:
+    <select id="targetGoal">
+      <option value="maintenance">Maintenance</option>
+      <option value="fatLoss">Fat Loss</option>
+      <option value="muscleGain">Muscle Gain</option>
+    </select>
+  </label>
+  <button onclick="saveProfile()">Save Profile</button>
+</div>
 
-  <!-- BMR + Macro Info -->
-  <div id="bmrInfo" style="margin-top: 20px; font-weight: bold;"></div>
+<div class="box">
+  <h3>Saved Profiles</h3>
+  <select id="profileList"></select>
+  <button onclick="loadProfile()">Load</button>
+  <button onclick="deleteProfile()">Delete</button>
+  <button onclick="editProfile()">Edit</button>
+</div>
 
-  <!-- Actions -->
-  <div>
-    <button onclick="generatePlan()">Generate 14-Day Plan</button>
-    <button onclick="downloadPDF()">Download PDF</button>
-  </div>
+<div class="box">
+  <h3>Plan Options</h3>
+  <label>
+    Goal Override (optional):
+    <select id="goalOverride">
+      <option value="">-- use profile goal --</option>
+      <option value="maintenance">Maintenance</option>
+      <option value="fatLoss">Fat Loss</option>
+      <option value="muscleGain">Muscle Gain</option>
+    </select>
+  </label>
+  <label class="row">
+    <span style="flex:1">Protein %: <input id="macroP" type="number" value="30" min="0" max="100"></span>
+    <span style="flex:1">Carbs %: <input id="macroC" type="number" value="40" min="0" max="100"></span>
+    <span style="flex:1">Fats %: <input id="macroF" type="number" value="30" min="0" max="100"></span>
+  </label>
+  <small>(Must total 100%)</small>
+</div>
 
-  <!-- Output -->
-  <pre id="output"></pre>
+<div class="box">
+  <h3>Dietary Restrictions</h3>
+  <label><input type="checkbox" class="restriction" value="meat"> Avoid Meat</label>
+  <label><input type="checkbox" class="restriction" value="pork"> Avoid Pork</label>
+  <label><input type="checkbox" class="restriction" value="chicken"> Avoid Chicken</label>
+  <label><input type="checkbox" class="restriction" value="fish"> Avoid Fish</label>
+  <label><input type="checkbox" class="restriction" value="seafood"> Avoid Seafood</label>
+  <label><input type="checkbox" class="restriction" value="veggies"> Avoid Veggies</label>
+  <label><input type="checkbox" class="restriction" value="rice"> Avoid Rice</label>
+  <label><input type="checkbox" class="restriction" value="eggs"> Avoid Eggs</label>
+  <label><input type="checkbox" class="restriction" value="dairy"> Avoid Dairy</label>
+  <label><input type="checkbox" class="restriction" value="soy"> Avoid Soy/Tofu</label>
+  <label><input type="checkbox" class="restriction" value="gluten"> Avoid Gluten</label>
+</div>
+
+<div class="box">
+  <button onclick="generatePlan()">Generate 14-Day Meal Plan</button>
+  <button onclick="downloadPDF()">Download PDF</button>
+</div>
+
+<div class="box" id="bmrResults"></div>
+<div class="box" id="mealPlan"></div>
 
 <script>
 let profiles = JSON.parse(localStorage.getItem("profiles") || "[]");
 let currentPlan = [];
 
-// Save profile
-function addProfile() {
-  let profile = {
-    name: document.getElementById("pname").value,
-    age: parseInt(document.getElementById("age").value),
-    weight: parseFloat(document.getElementById("weight").value),
-    height: parseFloat(document.getElementById("height").value),
-    gender: document.getElementById("gender").value,
-    activity: document.getElementById("activity").value
+function refreshProfileList(){
+  const list = document.getElementById("profileList");
+  list.innerHTML = "";
+  profiles.forEach((p,i)=>{
+    let opt = document.createElement("option");
+    opt.value=i; opt.text=p.name;
+    list.add(opt);
+  });
+}
+
+function saveProfile(){
+  const p = {
+    name: name.value, age:+age.value, weight:+weight.value, height:+height.value,
+    gender: gender.value, activity: activity.value, targetGoal: targetGoal.value
   };
-
-  if (!profile.name) { alert("Name required"); return; }
-
-  let existing = profiles.findIndex(p => p.name === profile.name);
-  if (existing >= 0) {
-    profiles[existing] = profile;
-  } else {
-    profiles.push(profile);
-  }
+  profiles.push(p);
   localStorage.setItem("profiles", JSON.stringify(profiles));
-  refreshProfiles();
+  refreshProfileList();
 }
-
-// Populate dropdown
-function refreshProfiles() {
-  let sel = document.getElementById("profileSelect");
-  sel.innerHTML = profiles.map(p => `<option>${p.name}</option>`).join("");
+function loadProfile(){
+  const idx=profileList.value;
+  if(idx==="")return;
+  const p=profiles[idx];
+  name.value=p.name; age.value=p.age; weight.value=p.weight; height.value=p.height;
+  gender.value=p.gender; activity.value=p.activity; targetGoal.value=p.targetGoal;
 }
-refreshProfiles();
-
-// Load profile into form
-function loadProfile() {
-  let sel = document.getElementById("profileSelect");
-  let p = profiles.find(x => x.name === sel.value);
-  if (!p) return;
-  document.getElementById("pname").value = p.name;
-  document.getElementById("age").value = p.age;
-  document.getElementById("weight").value = p.weight;
-  document.getElementById("height").value = p.height;
-  document.getElementById("gender").value = p.gender;
-  document.getElementById("activity").value = p.activity;
-}
-
-function editProfile() {
-  loadProfile();
-}
-
-function deleteProfile() {
-  let sel = document.getElementById("profileSelect");
-  let name = sel.value;
-  if (!name) return;
-  profiles = profiles.filter(p => p.name !== name);
+function deleteProfile(){
+  const idx=profileList.value;
+  if(idx==="")return;
+  profiles.splice(idx,1);
   localStorage.setItem("profiles", JSON.stringify(profiles));
-  refreshProfiles();
-  document.getElementById("output").textContent = "";
-  document.getElementById("bmrInfo").innerHTML = "";
+  refreshProfileList();
+}
+function editProfile(){
+  const idx=profileList.value;
+  if(idx==="")return;
+  profiles[idx]={ name:name.value, age:+age.value, weight:+weight.value, height:+height.value,
+    gender:gender.value, activity:activity.value, targetGoal:targetGoal.value};
+  localStorage.setItem("profiles", JSON.stringify(profiles));
+  refreshProfileList();
 }
 
-// Macro calculator
-function getMacros(calories) {
-  let protein = (calories * 0.30) / 4;
-  let carbs = (calories * 0.40) / 4;
-  let fats = (calories * 0.30) / 9;
-  return {
-    protein: protein.toFixed(0),
-    carbs: carbs.toFixed(0),
-    fats: fats.toFixed(0)
-  };
+function getMacrosFromCalories(cal, split){ 
+  const pCal=cal*(split.p/100), cCal=cal*(split.c/100), fCal=cal*(split.f/100);
+  return {protein_g:Math.round(pCal/4), carbs_g:Math.round(cCal/4), fats_g:Math.round(fCal/9)};
 }
 
-// BMR Calculation
-function calculateBMR(profile) {
-  let bmr;
-  if (profile.gender === "male") {
-    bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5;
-  } else {
-    bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
-  }
-
-  let factor = 1.2;
-  if (profile.activity === "light") factor = 1.375;
-  if (profile.activity === "moderate") factor = 1.55;
-  if (profile.activity === "active") factor = 1.725;
-  if (profile.activity === "veryActive") factor = 1.9;
-
-  let maintenance = bmr * factor;
+function calculateBMR(profile, split){
+  const {age,weight,height,gender}=profile;
+  let bmr=(gender==="male")?(10*weight+6.25*height-5*age+5):(10*weight+6.25*height-5*age-161);
+  let factor=1.2;
+  if(profile.activity==="light")factor=1.375;
+  if(profile.activity==="moderate")factor=1.55;
+  if(profile.activity==="active")factor=1.725;
+  if(profile.activity==="veryActive")factor=1.9;
+  const maintenance=Math.round(bmr*factor);
+  const fatLoss=Math.max(1200,Math.round(maintenance-500));
+  const muscleGain=Math.round(maintenance+500);
   return {
-    bmr,
-    maintenance,
-    fatLoss: maintenance - 500,
-    muscleGain: maintenance + 500,
-    macros: {
-      maintenance: getMacros(maintenance),
-      fatLoss: getMacros(maintenance - 500),
-      muscleGain: getMacros(maintenance + 500)
+    bmr:Math.round(bmr),maintenance,fatLoss,muscleGain,
+    macros:{
+      maintenance:getMacrosFromCalories(maintenance,split),
+      fatLoss:getMacrosFromCalories(fatLoss,split),
+      muscleGain:getMacrosFromCalories(muscleGain,split)
     }
   };
 }
 
-// Meals
-let meals = {
-  breakfast: {
-    "Herbalife Shake": { cal: 200, protein: 17 }
-  },
-  lunch: {
-    "Grilled Chicken + Rice": { cal: 450, protein: 40 },
-    "Fish + Rice": { cal: 400, protein: 35 },
-    "Lean Pork + Rice": { cal: 500, protein: 38 },
-    "Tofu + Vegetables": { cal: 350, protein: 25 }
-  },
-  dinner: {
-    "Herbalife Shake": { cal: 200, protein: 17 }
-  },
-  snack: {
-    "Banana": { cal: 105, protein: 1 },
-    "Egg": { cal: 78, protein: 6 },
-    "Banana + Egg": { cal: 183, protein: 7 },
-    "Salad": { cal: 120, protein: 3 },
-    "Greek yogurt (100g)": { cal: 60, protein: 10 },
-    "Apple": { cal: 95, protein: 0 },
-    "Peanut butter (1 tbsp) with cucumber slices": { cal: 120, protein: 4 }
+// Meals DB
+const breakfastOptions=[{name:"Herbalife Shake + Oatside Milk",cal:250,protein:15}];
+const lunchOptions=[
+ {name:"Grilled Chicken + Rice",cal:450,protein:35,tags:["chicken","meat","rice"]},
+ {name:"Fish Fillet + Veggies",cal:400,protein:30,tags:["fish","seafood","meat","veggies"]},
+ {name:"Tofu Stir Fry",cal:380,protein:22,tags:["soy","veggies"]},
+ {name:"Lean Pork + Rice",cal:460,protein:33,tags:["pork","meat","rice"]},
+ {name:"Veggie Salad + Egg",cal:350,protein:18,tags:["veggies","eggs"]}
+];
+const dinnerOptions=[{name:"Herbalife Shake + Oatside Milk",cal:250,protein:15}];
+const snackOptions=[
+ {name:"Banana",cal:105,protein:1,tags:[]},
+ {name:"Boiled Egg",cal:78,protein:6,tags:["eggs"]},
+ {name:"Apple",cal:95,protein:0,tags:[]},
+ {name:"Tuna (water-packed)",cal:120,protein:26,tags:["fish","seafood","meat"]},
+ {name:"Avocado",cal:160,protein:2,tags:[]}
+];
+
+// Plan Generator
+function generatePlan(){
+  const idx=profileList.value;
+  if(idx===""){alert("Select profile first");return;}
+  const profile=profiles[idx];
+  const override=goalOverride.value;
+  const split={p:+macroP.value||30,c:+macroC.value||40,f:+macroF.value||30};
+  if(split.p+split.c+split.f!==100){alert("Macro split must total 100%");return;}
+  const restrictions=[...document.querySelectorAll(".restriction:checked")].map(r=>r.value);
+  
+  // Hard-block impossible combos
+  if(restrictions.includes("meat")&&restrictions.includes("fish")&&restrictions.includes("seafood")&&restrictions.includes("soy")&&restrictions.includes("eggs")&&restrictions.includes("dairy")){
+    alert("⚠️ Restrictions too strict — no valid protein sources left.");return;
   }
-};
-
-// Generate unique 14-day plan
-function generatePlan() {
-  let sel = document.getElementById("profileSelect");
-  let profile = profiles.find(x => x.name === sel.value);
-  if (!profile) { alert("Select a profile"); return; }
-
-  let calc = calculateBMR(profile);
-
-  document.getElementById("bmrInfo").innerHTML = `
-    <p>BMR: ${calc.bmr.toFixed(0)} kcal/day</p>
-    <p>Maintenance: ${calc.maintenance.toFixed(0)} kcal/day 
-      (P: ${calc.macros.maintenance.protein}g, C: ${calc.macros.maintenance.carbs}g, F: ${calc.macros.maintenance.fats}g)</p>
-    <p>Fat Loss: ${calc.fatLoss.toFixed(0)} kcal/day 
-      (P: ${calc.macros.fatLoss.protein}g, C: ${calc.macros.fatLoss.carbs}g, F: ${calc.macros.fatLoss.fats}g)</p>
-    <p>Muscle Gain: ${calc.muscleGain.toFixed(0)} kcal/day 
-      (P: ${calc.macros.muscleGain.protein}g, C: ${calc.macros.muscleGain.carbs}g, F: ${calc.macros.muscleGain.fats}g)</p>
-  `;
-
-  let lunches = Object.keys(meals.lunch);
-  let snacks = Object.keys(meals.snack);
-
-  let usedLunches = shuffle([...lunches]);
-  let usedSnacks = shuffle([...snacks]);
-
-  currentPlan = [];
-  let out = "";
-
-  for (let i = 1; i <= 14; i++) {
-    if (usedLunches.length === 0) usedLunches = shuffle([...lunches]);
-    if (usedSnacks.length === 0) usedSnacks = shuffle([...snacks]);
-
-    let lunchKey = usedLunches.pop();
-    let snackKey = usedSnacks.pop();
-
-    let planDay = {
-      day: i,
-      breakfast: { name: "Herbalife Shake", ...meals.breakfast["Herbalife Shake"] },
-      lunch: { name: lunchKey, ...meals.lunch[lunchKey] },
-      dinner: { name: "Herbalife Shake", ...meals.dinner["Herbalife Shake"] },
-      snack: { name: snackKey, ...meals.snack[snackKey] }
-    };
-
-    let totalCal = planDay.breakfast.cal + planDay.lunch.cal + planDay.dinner.cal + planDay.snack.cal;
-    let totalProtein = planDay.breakfast.protein + planDay.lunch.protein + planDay.dinner.protein + planDay.snack.protein;
-
-    planDay.totalCal = totalCal;
-    planDay.totalProtein = totalProtein;
-
-    currentPlan.push(planDay);
-
-    out += `Day ${i}\n`;
-    out += `  Breakfast: ${planDay.breakfast.name} (${planDay.breakfast.cal} cal, ${planDay.breakfast.protein}g protein)\n`;
-    out += `  Lunch: ${planDay.lunch.name} (${planDay.lunch.cal} cal, ${planDay.lunch.protein}g protein)\n`;
-    out += `  Dinner: ${planDay.dinner.name} (${planDay.dinner.cal} cal, ${planDay.dinner.protein}g protein)\n`;
-    out += `  Snack: ${planDay.snack.name} (${planDay.snack.cal} cal, ${planDay.snack.protein}g protein)\n`;
-    out += `  👉 Total: ${totalCal} cal, ${totalProtein}g protein\n\n`;
+  if(restrictions.includes("rice")&&restrictions.includes("gluten")&&restrictions.includes("veggies")){
+    alert("⚠️ Restrictions too strict — no valid carb sources left.");return;
   }
 
-  document.getElementById("output").textContent = out;
-}
+  const calc=calculateBMR(profile,split);
+  const goal=override||profile.targetGoal;
+  let targetCalories=calc[goal==="fatLoss"?"fatLoss":(goal==="muscleGain"?"muscleGain":"maintenance")];
+  let targetMacros=calc.macros[goal];
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+  document.getElementById("bmrResults").innerHTML=
+    `<h3>BMR & Calorie Targets</h3>
+     <p>BMR: ${calc.bmr} kcal</p>
+     <p>Maintenance: ${calc.maintenance} kcal</p>
+     <p>Fat Loss: ${calc.fatLoss} kcal</p>
+     <p>Muscle Gain: ${calc.muscleGain} kcal</p>
+     <p>Goal: ${goal} — ${targetCalories} kcal</p>
+     <p>Macros: Protein ${targetMacros.protein_g}g, Carbs ${targetMacros.carbs_g}g, Fats ${targetMacros.fats_g}g</p>`;
+
+  // Filter meals
+  function filterMeals(list){
+    return list.filter(m=>{
+      if(!m.tags)return true;
+      return !m.tags.some(t=>restrictions.includes(t));
+    });
   }
-  return arr;
-}
+  const lunches=filterMeals(lunchOptions);
+  const dinners=filterMeals(dinnerOptions);
+  const snacks=filterMeals(snackOptions);
+  const breakfasts=filterMeals(breakfastOptions);
+  if(lunches.length===0||dinners.length===0||snacks.length===0){alert("Restrictions too strict for available meals.");return;}
 
-// Download PDF
-function downloadPDF() {
-  if (currentPlan.length === 0) { alert("Generate plan first"); return; }
+  currentPlan=[];
+  for(let d=1;d<=14;d++){
+    let b=breakfasts[0];
+    let l=lunches[(d-1)%lunches.length];
+    let dn=dinners[0];
+    let s=snacks[(d-1)%snacks.length];
+    let totalCal=b.cal+l.cal+dn.cal+s.cal;
+    let totalProtein=b.protein+l.protein+dn.protein+s.protein;
 
-  let sel = document.getElementById("profileSelect");
-  let profile = profiles.find(x => x.name === sel.value);
-  let calc = calculateBMR(profile);
+    // silent adjustments
+    while(totalCal<targetCalories*0.9 || totalProtein<targetMacros.protein_g*0.9){
+      if(totalProtein<targetMacros.protein_g*0.9 && !restrictions.includes("eggs")){
+        totalCal+=78; totalProtein+=6; // egg
+      } else if(totalProtein<targetMacros.protein_g*0.9 && !restrictions.includes("fish")){
+        totalCal+=120; totalProtein+=26; // tuna
+      } else if(totalCal<targetCalories*0.9){
+        totalCal+=95; // apple as filler carb
+      } else break;
+    }
 
-  let { jsPDF } = window.jspdf;
-  let doc = new jsPDF();
+    currentPlan.push({day:d,breakfast:b,lunch:l,dinner:dn,snack:s,totalCal,totalProtein});
+  }
 
-  doc.setFontSize(14);
-  doc.text("14-Day Meal Plan", 14, 20);
-  doc.text(`Client: ${profile.name}`, 14, 30);
-
-  doc.setFontSize(11);
-  doc.text(`BMR: ${calc.bmr.toFixed(0)} kcal/day`, 14, 40);
-  doc.text(`Maintenance: ${calc.maintenance.toFixed(0)} kcal/day (P:${calc.macros.maintenance.protein}g C:${calc.macros.maintenance.carbs}g F:${calc.macros.maintenance.fats}g)`, 14, 46);
-  doc.text(`Fat Loss: ${calc.fatLoss.toFixed(0)} kcal/day (P:${calc.macros.fatLoss.protein}g C:${calc.macros.fatLoss.carbs}g F:${calc.macros.fatLoss.fats}g)`, 14, 52);
-  doc.text(`Muscle Gain: ${calc.muscleGain.toFixed(0)} kcal/day (P:${calc.macros.muscleGain.protein}g C:${calc.macros.muscleGain.carbs}g F:${calc.macros.muscleGain.fats}g)`, 14, 58);
-
-  let rows = currentPlan.map(p => [
-    p.day,
-    p.breakfast.name,
-    p.lunch.name,
-    p.dinner.name,
-    p.snack.name,
-    `${p.totalCal} cal / ${p.totalProtein}g`
-  ]);
-
-  doc.autoTable({
-    head: [["Day","Breakfast","Lunch","Dinner","Snack","Daily Total"]],
-    body: rows,
-    startY: 65,
-    styles: { fontSize: 8 }
+  // Render
+  let html="<table><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snack</th><th>Calories</th><th>Protein</th></tr>";
+  currentPlan.forEach(day=>{
+    html+=`<tr><td>${day.day}</td><td>${day.breakfast.name}</td><td>${day.lunch.name}</td><td>${day.dinner.name}</td><td>${day.snack.name}</td><td>${day.totalCal}</td><td>${day.totalProtein}g</td></tr>`;
   });
-
-  doc.save("MealPlan.pdf");
+  html+="</table>";
+  document.getElementById("mealPlan").innerHTML=html;
 }
+
+// Shuffle helper (unused now but kept if needed)
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+
+// PDF Export
+function downloadPDF(){
+  if(currentPlan.length===0){alert("No plan generated yet.");return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  doc.setFontSize(16);
+  doc.text("14-Day Pinoy Meal Plan",14,20);
+  let rows=[];
+  currentPlan.forEach(day=>{
+    rows.push([
+      "Day "+day.day, day.breakfast.name, day.lunch.name, day.dinner.name, day.snack.name,
+      day.totalCal+" cal", day.totalProtein+" g P"
+    ]);
+  });
+  doc.autoTable({head:[["Day","Breakfast","Lunch","Dinner","Snack","Calories","Protein"]],body:rows,startY:30,styles:{fontSize:9,cellWidth:"wrap"},columnStyles:{0:{cellWidth:14}}});
+  doc.save("meal_plan.pdf");
+}
+
+refreshProfileList();
 </script>
 </body>
 </html>
