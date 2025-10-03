@@ -2,649 +2,243 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Pinoy 14-Day Meal Planner — PDF + Edit</title>
-<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Pinoy 14-Day Meal Planner (PDF + Nutrition)</title>
 <style>
-:root{
-  --bg:#07090a; --card:#0f1416; --muted:#9aa6a3;
-  --neon:#1eff6b; --accent:#12d3ff; --glass:rgba(255,255,255,0.02);
-  --radius:12px; --maxw:1200px;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(#030405,#07090a);color:#e6f7ea;padding:14px}
-.container{max-width:var(--maxw);margin:0 auto}
-.header{display:flex;gap:12px;align-items:center;margin-bottom:14px}
-.logo{width:54px;height:54px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#081311,#081428);border:1px solid rgba(255,255,255,0.02)}
-.title{font-size:18px;color:var(--neon);margin:0}
-.subtitle{margin:0;color:var(--muted);font-size:13px}
-
-.app{display:grid;grid-template-columns:300px 1fr;gap:12px}
-@media(max-width:920px){ .app{grid-template-columns:1fr} }
-
-.panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:12px; border-radius:var(--radius); border:1px solid var(--glass); box-shadow:0 10px 30px rgba(0,0,0,0.6)}
-.side{height:78vh; overflow:auto; padding:8px}
-.h3{color:var(--accent); margin:6px 0 10px}
-.label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
-.input, select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:#eafef0;margin-bottom:8px}
-
-.row{display:flex;gap:8px}
-.col{flex:1}
-.btn{background:linear-gradient(90deg,var(--neon),var(--accent)); color:#00110a; border:none; padding:10px; border-radius:10px; font-weight:700; cursor:pointer;}
-.btn.ghost{background:transparent; color:var(--neon); border:1px solid rgba(30,255,107,0.08)}
-.small{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);font-size:13px;cursor:pointer}
-
-.profile-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;margin-bottom:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
-.profile-item:hover{background:rgba(30,255,107,0.02)}
-.avatar{width:44px;height:44px;border-radius:50%;overflow:hidden;background:#071010;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.avatar img{width:100%;height:100%;object-fit:cover}
-
-.step{display:none}
-.step.active{display:block}
-
-/* Results */
-.daycard{display:flex;gap:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02);margin-bottom:10px}
-.thumb{width:110px;height:82px;border-radius:8px;overflow:hidden;background:#071010;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.thumb img{width:100%;height:100%;object-fit:cover}
-.meal-info{flex:1}
-.meal-title{font-weight:700;color:#eafef0;margin:0 0 6px 0}
-.meta{color:var(--muted);font-size:13px}
-.macro-row{display:flex;gap:8px;margin-top:8px}
-.pill{padding:6px 8px;border-radius:8px;font-weight:700;font-size:12px;color:#00110a;background:linear-gradient(90deg,var(--neon),var(--accent))}
-
-.table{width:100%;border-collapse:collapse;margin-top:10px}
-.table th, .table td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;text-align:left}
-.table th{color:var(--muted)}
-.totals{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-.tot{flex:1;min-width:130px;background:rgba(255,255,255,0.02);padding:8px;border-radius:10px;text-align:center}
-.footer{margin-top:10px;color:var(--muted);font-size:13px;text-align:center}
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  h1, h2 { color: #2c3e50; }
+  .profile-list button { margin-left: 5px; }
+  table { border-collapse: collapse; margin-top: 10px; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
+  th { background: #ecf0f1; }
+  .meal-table { margin-top: 20px; }
+  .button-group button { margin: 5px; }
+  small { color: #555; }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <div class="logo" aria-hidden>
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#1eff6b"/><stop offset="1" stop-color="#12d3ff"/></linearGradient></defs><path d="M3 12c1.5-5 7-9 12-9 0 0-4.5 6-2 11 2.5 5 6.5 7 6.5 7s-6.5-1.5-12-7C3.5 13.5 3 12 3 12z" fill="url(#g)"/></svg>
-    </div>
-    <div>
-      <div class="title">Pinoy 14-Day Meal Planner</div>
-      <div class="subtitle">Herbalife breakfast & dinner • Rice at lunch • No consecutive repeats</div>
-    </div>
-  </div>
+<h1>Pinoy 14-Day Meal Planner</h1>
 
-  <div class="app">
-
-    <!-- LEFT: controls & profiles -->
-    <div class="panel side">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="h3">Profiles</div>
-      </div>
-      <div id="profilesList" style="margin-top:8px"></div>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:10px 0">
-
-      <div class="h3">Create / Edit</div>
-      <label class="label">Profile photo (optional)</label>
-      <input id="photoInput" type="file" accept="image/*" class="input">
-
-      <label class="label">Name</label>
-      <input id="name" class="input" placeholder="Client name">
-
-      <div class="row">
-        <div class="col">
-          <label class="label">Age</label>
-          <input id="age" class="input" type="number" min="10">
-        </div>
-        <div class="col">
-          <label class="label">Sex</label>
-          <select id="sex" class="input"><option value="male">Male</option><option value="female">Female</option></select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <label class="label">Height (cm)</label>
-          <input id="height" class="input" type="number" min="50">
-        </div>
-        <div class="col">
-          <label class="label">Weight (kg)</label>
-          <input id="weight" class="input" type="number" min="20" step="0.1">
-        </div>
-      </div>
-
-      <label class="label">Goal</label>
-      <select id="goal" class="input"><option value="lose">Lose weight</option><option value="maintain">Maintain</option><option value="gain">Build muscle</option></select>
-
-      <label class="label">Allergies (comma separated)</label>
-      <input id="allergies" class="input" placeholder="e.g., egg, milk, peanut">
-
-      <label class="label"><input id="alwaysHerb" type="checkbox" checked> Always include Herbalife (breakfast & dinner)</label>
-
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn" onclick="createOrUpdateProfile()">Save + Generate 14-day</button>
-        <button class="btn ghost" onclick="clearForm()">Clear</button>
-      </div>
-
-      <div style="margin-top:12px">
-        <button class="small" onclick="importAll()">Import JSON</button>
-      </div>
-    </div>
-
-    <!-- RIGHT: results -->
-    <div>
-      <div class="panel">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-          <div>
-            <div style="font-weight:700;color:var(--neon)" id="r_name">No profile selected</div>
-            <div style="color:var(--muted);font-size:13px" id="r_meta">Fill the form and press Save + Generate</div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="small" onclick="regenerate()">Regenerate</button>
-            <button class="small" id="downloadBtn" onclick="downloadPDF()">Download Meal Plan (PDF)</button>
-            <button class="small" onclick="deleteCurrent()">Delete Profile</button>
-          </div>
-        </div>
-
-        <div id="summary" style="margin-top:10px"></div>
-
-        <div id="viewControls" style="display:flex;gap:8px;margin-top:10px">
-          <button class="small" onclick="showDayView()">Day view</button>
-          <button class="small" onclick="showTableView()">14-day table</button>
-        </div>
-
-        <div id="resultsArea" style="margin-top:12px">
-          <div id="dayCards"></div>
-
-          <div id="tableWrap" style="display:none">
-            <table class="table" id="planTable">
-              <thead><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Snack A</th><th>Snack B</th><th>Dinner</th><th>Total kcal</th><th>P(g)</th><th>C(g)</th><th>F(g)</th></tr></thead>
-              <tbody id="planTableBody"></tbody>
-            </table>
-          </div>
-
-          <div id="dailyTotalsWrap" style="margin-top:12px"></div>
-        </div>
-
-      </div>
-
-      <div class="footer">All data saved locally in your browser. Download PDF only when you're ready to print.</div>
-    </div>
-  </div>
+<div>
+  <h2>Create Profile</h2>
+  <label>Name: <input type="text" id="name"></label><br/>
+  <label>Age: <input type="number" id="age"></label><br/>
+  <label>Sex: 
+    <select id="sex">
+      <option>Male</option>
+      <option>Female</option>
+    </select>
+  </label><br/>
+  <label>Weight (kg): <input type="number" id="weight"></label><br/>
+  <label>Height (cm): <input type="number" id="height"></label><br/>
+  <label>Activity Level: 
+    <select id="activity">
+      <option value="1.2">Sedentary</option>
+      <option value="1.375">Lightly active</option>
+      <option value="1.55">Moderately active</option>
+      <option value="1.725">Very active</option>
+    </select>
+  </label><br/>
+  <button onclick="saveProfile()">Save Profile</button>
 </div>
 
-<!-- jsPDF + autotable -->
+<div>
+  <h2>Profiles</h2>
+  <div class="profile-list" id="profileList"></div>
+</div>
+
+<div class="button-group">
+  <button onclick="generateAndShowPlan()">Generate 14-Day Plan</button>
+  <button onclick="exportMealPlanPDF()">Export as PDF</button>
+</div>
+
+<div id="mealPlanTable"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script>
-/* ---------------- DATA (same as before) ------------- */
-const HERBALIFE = {name:"Herbalife Formula 1 + 200ml Oatside", cal:200, protein:18, carbs:20, fat:4, serve:"2 scoops + 200ml Oatside"};
-const RICE = {serve:"Cooked white rice (150g)", cal:200, protein:4, carbs:45, fat:0.5};
+let profiles = JSON.parse(localStorage.getItem("profiles") || "[]");
+let currentMealPlan = [];
 
-const LUNCH_POOL = [
-  {name:"Chicken Adobo (lean) - 160g chicken", meat_g:160, cal:270, protein:46, carbs:2, fat:6},
-  {name:"Grilled Bangus (deboned) - 170g", meat_g:170, cal:300, protein:45, carbs:0, fat:9},
-  {name:"Beef Tapa (lean) - 150g", meat_g:150, cal:320, protein:48, carbs:0, fat:8},
-  {name:"Grilled Tilapia - 180g fillet", meat_g:180, cal:280, protein:44, carbs:0, fat:6},
-  {name:"Tinolang Manok (chicken breast) - 160g", meat_g:160, cal:260, protein:44, carbs:5, fat:5},
-  {name:"Pork Giniling (lean) - 150g", meat_g:150, cal:300, protein:40, carbs:6, fat:12},
-  {name:"Baked Salmon - 140g fillet", meat_g:140, cal:340, protein:42, carbs:0, fat:18},
-  {name:"Tuna Sisig (fresh) - 160g tuna", meat_g:160, cal:280, protein:44, carbs:3, fat:6},
-  {name:"Grilled Chicken Inasal - 160g breast", meat_g:160, cal:270, protein:45, carbs:2, fat:6},
-  {name:"Munggo with shrimp - 200g", meat_g:200, cal:320, protein:36, carbs:40, fat:6},
-  {name:"Beef Nilaga (lean) - 150g", meat_g:150, cal:300, protein:44, carbs:5, fat:7},
-  {name:"Pork Sinigang (lean) - 150g", meat_g:150, cal:310, protein:40, carbs:6, fat:9},
-  {name:"Sinigang na Isda - 180g fish", meat_g:180, cal:290, protein:44, carbs:5, fat:7},
-  {name:"Chicken Afritada (lean) - 160g", meat_g:160, cal:300, protein:42, carbs:8, fat:8},
-  {name:"Bangus Steak (grilled) - 170g", meat_g:170, cal:300, protein:45, carbs:2, fat:9},
-  {name:"Tokwa't Manok - 180g (tofu + chicken)", meat_g:180, cal:280, protein:36, carbs:10, fat:10},
-  {name:"Beef Bistek (lean) - 150g", meat_g:150, cal:310, protein:44, carbs:3, fat:8},
-  {name:"Grilled Shrimp Skewers - 170g", meat_g:170, cal:260, protein:46, carbs:2, fat:4},
-  {name:"Pork Menudo (lean) - 150g", meat_g:150, cal:320, protein:40, carbs:10, fat:10},
-  {name:"Chicken Sisig (healthy) - 160g", meat_g:160, cal:280, protein:44, carbs:3, fat:6},
-  {name:"Pinakbet with lean pork - 200g", meat_g:200, cal:320, protein:30, carbs:20, fat:12},
-  {name:"Beef Kare-Kare (lean) - 150g", meat_g:150, cal:330, protein:42, carbs:8, fat:12},
-  {name:"Tortang Talong w/ ground chicken - 200g", meat_g:200, cal:280, protein:34, carbs:10, fat:10},
-  {name:"Ginisang Ampalaya w/ egg & chicken - 180g", meat_g:180, cal:260, protein:36, carbs:8, fat:8},
-  {name:"Grilled Pork Tender - 150g", meat_g:150, cal:320, protein:42, carbs:1, fat:12},
-  {name:"Baked Tuna Patties - 170g", meat_g:170, cal:290, protein:44, carbs:5, fat:8},
-  {name:"Grilled Salmon Belly - 140g", meat_g:140, cal:360, protein:42, carbs:0, fat:20},
-  {name:"Sinigang na Baboy (lean) - 150g", meat_g:150, cal:320, protein:40, carbs:6, fat:10},
-  {name:"Laing w/ tokwa & fish flakes - 180g", meat_g:180, cal:300, protein:28, carbs:10, fat:14},
-  {name:"Chicken Caldereta (lean) - 160g", meat_g:160, cal:320, protein:40, carbs:8, fat:10}
-];
-
-const SNACK_POOL = [
-  {name:"Boiled Eggs (2)", serve:"2 large eggs", cal:140, protein:12, carbs:1, fat:10},
-  {name:"Greek yogurt (200g, low-fat)", serve:"200g", cal:150, protein:18, carbs:12, fat:3},
-  {name:"Tuna (100g) on wholegrain toast", serve:"100g tuna + 1 slice", cal:220, protein:25, carbs:18, fat:6},
-  {name:"Cottage cheese (150g) + pineapple", serve:"150g", cal:160, protein:18, carbs:12, fat:4},
-  {name:"Protein bar (~45g)", serve:"1 bar", cal:210, protein:20, carbs:24, fat:7},
-  {name:"Apple (150g) + 30g peanut butter", serve:"1 apple+30g pb", cal:270, protein:7, carbs:35, fat:12},
-  {name:"Camote (150g) baked + 30g ricotta", serve:"150g+30g", cal:200, protein:6, carbs:45, fat:2},
-  {name:"Mixed nuts (35g)", serve:"35g", cal:210, protein:6, carbs:7, fat:18},
-  {name:"Boiled chickpeas (200g)", serve:"200g", cal:240, protein:12, carbs:40, fat:4},
-  {name:"Tofu skewers (120g)", serve:"120g tofu", cal:180, protein:16, carbs:8, fat:10},
-  {name:"Banana (120g) + 20g peanut butter", serve:"banana+20g pb", cal:210, protein:5, carbs:30, fat:9},
-  {name:"Sardines (in water) 120g + 1 toast", serve:"120g", cal:200, protein:22, carbs:12, fat:6},
-  {name:"Hard-boiled egg + low-fat cheese", serve:"1 egg+30g", cal:140, protein:13, carbs:1, fat:9},
-  {name:"Protein shake (whey, 1 scoop)", serve:"1 scoop", cal:140, protein:24, carbs:6, fat:2}
-];
-
-/* ---------- Helpers & Storage ---------- */
-function $(id){ return document.getElementById(id); }
-const STORAGE_KEY = 'pinoy14_profiles_v3';
-function loadProfiles(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; } catch(e){ return []; } }
-function saveProfiles(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-/* ---------- Render profiles ---------- */
-function renderProfiles(){
-  const list = $('profilesList'); list.innerHTML = '';
-  const profiles = loadProfiles();
-  if(profiles.length === 0){
-    list.innerHTML = `<div style="color:var(--muted);font-size:13px">No profiles yet. Fill the form and Save + Generate.</div>`;
-    return;
+// Nutrition data
+const mealData = {
+  breakfast: {
+    "2 scoops Herbalife Formula 1 shake with 200ml Oatside milk": { cal: 250, protein: 17 }
+  },
+  lunch: {
+    "Grilled chicken breast with 1 cup rice": { cal: 450, protein: 35 },
+    "Beef stir-fry with 1 cup rice": { cal: 500, protein: 32 },
+    "Fish fillet with 1 cup rice": { cal: 420, protein: 30 },
+    "Tofu and vegetables with 1 cup rice": { cal: 380, protein: 22 }
+  },
+  dinner: {
+    "2 scoops Herbalife Formula 1 shake with 200ml Oatside milk": { cal: 250, protein: 17 }
+  },
+  snack: {
+    "Banana": { cal: 105, protein: 1 },
+    "Egg": { cal: 78, protein: 6 },
+    "Banana + Egg": { cal: 183, protein: 7 },
+    "Salad": { cal: 120, protein: 3 }
   }
-  profiles.forEach((p, idx) => {
-    const el = document.createElement('div'); el.className = 'profile-item';
-    el.onclick = () => loadProfile(idx);
-    const avatar = document.createElement('div'); avatar.className='avatar';
-    if(p.photo){
-      const img = document.createElement('img'); img.src = p.photo; avatar.appendChild(img);
-    } else {
-      avatar.innerHTML = `<svg width="44" height="44" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3" fill="#1eff6b" /><rect x="6" y="14" width="12" height="6" rx="2" fill="#12d3ff"/></svg>`;
-    }
-    const meta = document.createElement('div'); meta.style.flex='1';
-    meta.innerHTML = `<div style="font-weight:700;color:#eaffef">${escapeHtml(p.name)}</div><div style="font-size:12px;color:var(--muted)">Goal: ${p.goal} • ${p.weight}kg • ${new Date(p.created).toLocaleDateString()}</div>`;
-    const actions = document.createElement('div');
-    actions.style.display='flex'; actions.style.gap='6px';
-    const editBtn = document.createElement('button'); editBtn.className='small'; editBtn.textContent='Edit';
-    editBtn.onclick = (ev)=>{ ev.stopPropagation(); openEdit(idx); };
-    const delBtn = document.createElement('button'); delBtn.className='small'; delBtn.textContent='Delete';
-    delBtn.onclick = (ev)=>{ ev.stopPropagation(); if(confirm('Delete '+p.name+'?')){ deleteProfile(idx); } };
-    actions.appendChild(editBtn); actions.appendChild(delBtn);
-    el.appendChild(avatar); el.appendChild(meta); el.appendChild(actions);
-    list.appendChild(el);
+};
+
+function saveProfile() {
+  const name = document.getElementById("name").value;
+  const age = parseInt(document.getElementById("age").value);
+  const sex = document.getElementById("sex").value;
+  const weight = parseFloat(document.getElementById("weight").value);
+  const height = parseFloat(document.getElementById("height").value);
+  const activity = parseFloat(document.getElementById("activity").value);
+
+  if (!name || !age || !weight || !height) return alert("Fill all fields");
+
+  const profile = { name, age, sex, weight, height, activity };
+  profiles.push(profile);
+  localStorage.setItem("profiles", JSON.stringify(profiles));
+  renderProfiles();
+}
+
+function renderProfiles() {
+  const list = document.getElementById("profileList");
+  list.innerHTML = "";
+  profiles.forEach((p, i) => {
+    const div = document.createElement("div");
+    div.textContent = `${p.name} (${p.age} y/o, ${p.sex}) `;
+    const btn = document.createElement("button");
+    btn.textContent = "Use Profile";
+    btn.onclick = () => { generateAndShowPlan(p); };
+    div.appendChild(btn);
+    list.appendChild(div);
   });
 }
 
-/* ---------- Form controls ---------- */
-let editIndex = null;
-let loadedPhotoDataUrl = null;
-$('photoInput').addEventListener('change', e => {
-  const f = e.target.files[0];
-  if(!f) { loadedPhotoDataUrl = null; return; }
-  const reader = new FileReader();
-  reader.onload = ev => { loadedPhotoDataUrl = ev.target.result; };
-  reader.readAsDataURL(f);
-});
+function generateMealPlan(profile) {
+  const breakfasts = Object.keys(mealData.breakfast);
+  const lunches = Object.keys(mealData.lunch);
+  const dinners = Object.keys(mealData.dinner);
+  const snacks = Object.keys(mealData.snack);
 
-function clearForm(){
-  editIndex = null;
-  loadedPhotoDataUrl = null;
-  $('photoInput').value='';
-  $('name').value=''; $('age').value=''; $('sex').value='male'; $('height').value=''; $('weight').value='';
-  $('goal').value='lose'; $('allergies').value=''; $('alwaysHerb').checked=true;
-}
+  let plan = [];
+  let lastLunch = "", lastSnack = "";
 
-/* ---------- Create / Update ---------- */
-function createOrUpdateProfile(){
-  const name = $('name').value.trim(); if(!name){ alert('Enter name'); return; }
-  const age = Number($('age').value); const sex = $('sex').value;
-  const height = Number($('height').value); const weight = Number($('weight').value);
-  const goal = $('goal').value; const allergies = $('allergies').value.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-  const alwaysHerb = $('alwaysHerb').checked;
+  for (let i = 0; i < 14; i++) {
+    let breakfast = breakfasts[0];
+    let dinner = dinners[0];
 
-  if(!age || !height || !weight){ alert('Fill age, height, weight'); return; }
+    let lunch;
+    do {
+      lunch = lunches[Math.floor(Math.random() * lunches.length)];
+    } while (lunch === lastLunch);
+    lastLunch = lunch;
 
-  const profiles = loadProfiles();
-  const profile = { name, age, sex, height, weight, goal, allergies, alwaysHerb, created: Date.now() };
-  if(loadedPhotoDataUrl) profile.photo = loadedPhotoDataUrl;
+    let snack;
+    do {
+      snack = snacks[Math.floor(Math.random() * snacks.length)];
+    } while (snack === lastSnack);
+    lastSnack = snack;
 
-  // generate plan
-  const planObj = generate14Day(profile);
-  profile.plan = planObj;
-
-  if(editIndex === null){
-    profiles.push(profile);
-    saveProfiles(profiles);
-    renderProfiles();
-    loadProfile(profiles.length-1);
-    clearForm();
-  } else {
-    // keep created timestamp
-    profile.created = profiles[editIndex].created || Date.now();
-    profiles[editIndex] = profile;
-    saveProfiles(profiles);
-    renderProfiles();
-    loadProfile(editIndex);
-    clearForm();
-  }
-}
-
-/* ---------- Open edit ---------- */
-function openEdit(idx){
-  const profiles = loadProfiles(); const p = profiles[idx]; if(!p) return;
-  editIndex = idx;
-  $('name').value = p.name; $('age').value = p.age; $('sex').value = p.sex; $('height').value = p.height; $('weight').value = p.weight;
-  $('goal').value = p.goal; $('allergies').value = (p.allergies||[]).join(', '); $('alwaysHerb').checked = !!p.alwaysHerb;
-  loadedPhotoDataUrl = p.photo || null;
-  // show a small preview by setting photoInput? we leave file input as-is
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-/* ---------- Delete ---------- */
-function deleteProfile(idx){
-  const profiles = loadProfiles(); profiles.splice(idx,1); saveProfiles(profiles); renderProfiles();
-  // clear view if deleted current
-  if(CURRENT_INDEX === idx){ CURRENT_INDEX = null; $('r_name').innerText='No profile selected'; $('r_meta').innerText=''; $('dayCards').innerHTML=''; $('planTableBody').innerHTML=''; $('summary').innerHTML=''; $('dailyTotalsWrap').innerHTML=''; }
-}
-
-/* ---------- Load profile ---------- */
-let CURRENT_INDEX = null;
-function loadProfile(idx){
-  const profiles = loadProfiles(); const p = profiles[idx]; if(!p) return;
-  CURRENT_INDEX = idx;
-  $('r_name').innerText = p.name;
-  $('r_meta').innerText = `Goal: ${p.goal} • ${p.weight}kg • ${p.height}cm • ${p.age}yo`;
-  const bmr = calcBMR(p.weight, p.height, p.age, p.sex);
-  const targets = getTargets(bmr, p.goal);
-  $('summary').innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap">
-    <div class="tot"><div style="color:var(--muted)">BMR</div><div style="font-weight:700">${bmr} kcal</div></div>
-    <div class="tot"><div style="color:var(--muted)">Cal target</div><div style="font-weight:700">${targets.calTarget} kcal/day</div></div>
-    <div class="tot"><div style="color:var(--muted)">Protein</div><div style="font-weight:700">${targets.protein_g} g/day</div></div>
-    <div class="tot"><div style="color:var(--muted)">Carbs</div><div style="font-weight:700">${targets.carbs_g} g/day</div></div>
-    <div class="tot"><div style="color:var(--muted)">Fat</div><div style="font-weight:700">${targets.fats_g} g/day</div></div>
-  </div>`;
-  displayPlan(p.plan);
-}
-
-/* ---------- BMR & targets ---------- */
-function calcBMR(weight, heightCm, age, sex){
-  if(sex === 'male') return Math.round(10*weight + 6.25*heightCm - 5*age + 5);
-  return Math.round(10*weight + 6.25*heightCm - 5*age - 161);
-}
-function getTargets(bmr, goal){
-  let calTarget, ratios;
-  if(goal === 'lose'){ calTarget = Math.round(bmr * 0.85); ratios = {p:0.35, c:0.35, f:0.30}; }
-  else if(goal === 'gain'){ calTarget = Math.round(bmr * 1.15); ratios = {p:0.30, c:0.45, f:0.25}; }
-  else { calTarget = Math.round(bmr * 1.0); ratios = {p:0.30, c:0.40, f:0.30}; }
-  return { calTarget, protein_g: Math.round(calTarget * ratios.p / 4), carbs_g: Math.round(calTarget * ratios.c / 4), fats_g: Math.round(calTarget * ratios.f / 9) };
-}
-
-/* ---------- Generate 14-day plan (no consecutive repeats) ---------- */
-function generate14Day(profile){
-  const bmr = calcBMR(profile.weight, profile.height, profile.age, profile.sex);
-  const targets = getTargets(bmr, profile.goal);
-  const keys = (profile.allergies || []).map(k => k.toLowerCase());
-  const lunches = LUNCH_POOL.filter(m => !keys.some(k => m.name.toLowerCase().includes(k)));
-  const snacks = SNACK_POOL.filter(m => !keys.some(k => m.name.toLowerCase().includes(k)));
-
-  if(lunches.length === 0) { alert('No lunches available after allergy filtering'); return null; }
-  if(snacks.length === 0) { alert('No snacks available after allergy filtering'); return null; }
-
-  function pickAvoid(arr, prevIdx){
-    if(arr.length === 0) return -1;
-    if(arr.length === 1) return 0;
-    let tries=0; let idx;
-    do { idx = Math.floor(Math.random()*arr.length); tries++; } while(idx===prevIdx && tries<20);
-    if(idx===prevIdx){ for(let i=0;i<arr.length;i++){ if(i!==prevIdx){ idx=i; break; } } }
-    return idx;
-  }
-
-  const week = []; let prevLunch=-1, prevA=-1, prevB=-1;
-  for(let d=0; d<14; d++){
-    const breakfast = profile.alwaysHerb ? HERBALIFE : randomFrom(lunches);
-    const lunchIdx = pickAvoid(lunches, prevLunch); const lunch = lunches[lunchIdx]; prevLunch = lunchIdx;
-    const dinner = profile.alwaysHerb ? HERBALIFE : randomFrom(lunches);
-
-    let aIdx = pickAvoid(snacks, prevA); let bIdx = pickAvoid(snacks, prevB);
-    if(aIdx === bIdx){
-      for(let i=0;i<snacks.length;i++){ if(i!==aIdx && i!==prevB){ bIdx=i; break; } }
-      if(aIdx === bIdx) bIdx = (aIdx+1) % snacks.length;
-    }
-    const snackA = snacks[aIdx]; const snackB = snacks[bIdx]; prevA=aIdx; prevB=bIdx;
-
-    const lunchWithRice = {
-      name: lunch.name + " + " + RICE.serve,
-      serve: `${lunch.meat_g}g + 150g rice`,
-      cal: lunch.cal + RICE.cal,
-      protein: lunch.protein + RICE.protein,
-      carbs: lunch.carbs + RICE.carbs,
-      fat: lunch.fat + RICE.fat
-    };
-
-    const total_cal = (breakfast.cal||0) + lunchWithRice.cal + (snackA?snackA.cal:0) + (snackB?snackB.cal:0) + (dinner.cal||0);
-    const total_p = (breakfast.protein||0) + lunchWithRice.protein + (snackA?snackA.protein:0) + (snackB?snackB.protein:0) + (dinner.protein||0);
-    const total_c = (breakfast.carbs||0) + lunchWithRice.carbs + (snackA?snackA.carbs:0) + (snackB?snackB.carbs:0) + (dinner.carbs||0);
-    const total_f = (breakfast.fat||0) + lunchWithRice.fat + (snackA?snackA.fat:0) + (snackB?snackB.fat:0) + (dinner.fat||0);
-
-    week.push({
-      day: d+1,
-      breakfast,
-      lunch:{...lunch, withRice: lunchWithRice},
-      snackA,
-      snackB,
-      dinner,
-      totals: {cal: total_cal, protein: total_p, carbs: total_c, fat: total_f}
+    plan.push({ 
+      day: i + 1, 
+      breakfast: { name: breakfast, ...mealData.breakfast[breakfast] },
+      lunch: { name: lunch, ...mealData.lunch[lunch] },
+      snack: { name: snack, ...mealData.snack[snack] },
+      dinner: { name: dinner, ...mealData.dinner[dinner] },
+      totals: {
+        cal: mealData.breakfast[breakfast].cal +
+             mealData.lunch[lunch].cal +
+             mealData.snack[snack].cal +
+             mealData.dinner[dinner].cal,
+        protein: mealData.breakfast[breakfast].protein +
+                 mealData.lunch[lunch].protein +
+                 mealData.snack[snack].protein +
+                 mealData.dinner[dinner].protein
+      }
     });
   }
-  return { bmr, targets, week };
+  return plan;
 }
-function randomFrom(arr){ if(!arr || arr.length===0) return null; return arr[Math.floor(Math.random()*arr.length)]; }
 
-/* ---------- Display plan on screen ---------- */
-function displayPlan(plan){
-  if(!plan) return;
-  const dayCards = $('dayCards'); dayCards.innerHTML='';
-  const tableBody = $('planTableBody'); tableBody.innerHTML='';
-  let sumCal=0, sumP=0, sumC=0, sumF=0;
+function generateAndShowPlan(profile) {
+  if (!profile) profile = profiles[profiles.length - 1];
+  if (!profile) return alert("No profile found.");
 
-  plan.week.forEach(day => {
-    const card = document.createElement('div'); card.className='daycard';
-    const thumb = document.createElement('div'); thumb.className='thumb';
-    const svg = svgThumb(`Day ${day.day}\n${day.lunch.name}`, '#1eff6b');
-    const img = document.createElement('img'); img.src = svg; thumb.appendChild(img);
+  currentMealPlan = generateMealPlan(profile);
+  updateMealPlanTable();
+}
 
-    const info = document.createElement('div'); info.className='meal-info';
-    info.innerHTML = `<div class="meal-title">Day ${day.day} — ${Math.round(day.totals.cal)} kcal</div>
-      <div class="meta"><strong>Breakfast:</strong> ${day.breakfast.name} — ${day.breakfast.cal} kcal • P${day.breakfast.protein}g C${day.breakfast.carbs}g F${day.breakfast.fat}g</div>
-      <div class="meta"><strong>Lunch:</strong> ${day.lunch.withRice.name} — ${day.lunch.withRice.serve} — ${Math.round(day.lunch.withRice.cal)} kcal • P${Math.round(day.lunch.withRice.protein)}g C${Math.round(day.lunch.withRice.carbs)}g F${Math.round(day.lunch.withRice.fat)}g</div>
-      <div class="meta"><strong>Snack A:</strong> ${day.snackA ? day.snackA.name + ' ('+day.snackA.serve+')' : '—'} — ${day.snackA ? day.snackA.cal+' kcal' : ''}</div>
-      <div class="meta"><strong>Snack B:</strong> ${day.snackB ? day.snackB.name + ' ('+day.snackB.serve+')' : '—'} — ${day.snackB ? day.snackB.cal+' kcal' : ''}</div>
-      <div class="meta"><strong>Dinner:</strong> ${day.dinner.name} — ${day.dinner.cal} kcal • P${day.dinner.protein}g C${day.dinner.carbs}g F${day.dinner.fat}g</div>
-      <div class="macro-row"><div class="pill">P ${Math.round(day.totals.protein)}g</div><div class="pill" style="background:linear-gradient(90deg,#12d3ff,#1eff6b)">C ${Math.round(day.totals.carbs)}g</div><div class="pill" style="background:linear-gradient(90deg,#ffb86b,#ffcc80)">F ${Math.round(day.totals.fat)}g</div></div>
-    `;
-    card.appendChild(thumb); card.appendChild(info);
-    dayCards.appendChild(card);
+function updateMealPlanTable() {
+  const tableContainer = document.getElementById("mealPlanTable");
+  tableContainer.innerHTML = "";
+  
+  const table = document.createElement("table");
+  table.classList.add("meal-table");
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>Day ${day.day}</td>
-      <td>${day.breakfast.name}</td>
-      <td>${day.lunch.withRice.name} — ${day.lunch.withRice.serve}</td>
-      <td>${day.snackA ? day.snackA.name : ''}</td>
-      <td>${day.snackB ? day.snackB.name : ''}</td>
-      <td>${day.dinner.name}</td>
-      <td>${Math.round(day.totals.cal)}</td>
-      <td>${Math.round(day.totals.protein)}</td>
-      <td>${Math.round(day.totals.carbs)}</td>
-      <td>${Math.round(day.totals.fat)}</td>`;
-    tableBody.appendChild(tr);
+  const headerRow = `
+    <tr>
+      <th>Day</th>
+      <th>Breakfast</th>
+      <th>Lunch</th>
+      <th>Snack</th>
+      <th>Dinner</th>
+      <th>Total Calories</th>
+      <th>Total Protein (g)</th>
+    </tr>`;
+  table.innerHTML = headerRow;
 
-    sumCal += day.totals.cal; sumP += day.totals.protein; sumC += day.totals.carbs; sumF += day.totals.fat;
+  currentMealPlan.forEach(day => {
+    const row = `
+      <tr>
+        <td>${day.day}</td>
+        <td>${day.breakfast.name} <br><small>${day.breakfast.cal} cal, ${day.breakfast.protein}g protein</small></td>
+        <td>${day.lunch.name} <br><small>${day.lunch.cal} cal, ${day.lunch.protein}g protein</small></td>
+        <td>${day.snack.name} <br><small>${day.snack.cal} cal, ${day.snack.protein}g protein</small></td>
+        <td>${day.dinner.name} <br><small>${day.dinner.cal} cal, ${day.dinner.protein}g protein</small></td>
+        <td>${day.totals.cal}</td>
+        <td>${day.totals.protein}</td>
+      </tr>`;
+    table.innerHTML += row;
   });
 
-  $('dailyTotalsWrap').innerHTML = `<div class="totals">
-    <div class="tot"><div style="color:var(--muted)">14-day avg kcal</div><div style="font-weight:700">${Math.round(sumCal/14)}</div></div>
-    <div class="tot"><div style="color:var(--muted)">Avg protein/day (g)</div><div style="font-weight:700">${Math.round(sumP/14)}</div></div>
-    <div class="tot"><div style="color:var(--muted)">Avg carbs/day (g)</div><div style="font-weight:700">${Math.round(sumC/14)}</div></div>
-    <div class="tot"><div style="color:var(--muted)">Avg fat/day (g)</div><div style="font-weight:700">${Math.round(sumF/14)}</div></div>
-  </div>`;
-
-  showDayView();
+  tableContainer.appendChild(table);
 }
 
-/* ---------- View controls ---------- */
-function showDayView(){ $('dayCards').style.display='block'; $('tableWrap').style.display='none'; }
-function showTableView(){ $('dayCards').style.display='none'; $('tableWrap').style.display='block'; }
-
-/* ---------- Regenerate current ---------- */
-function regenerate(){ if(CURRENT_INDEX===null){ alert('Open a profile first'); return; } const profiles = loadProfiles(); const p = profiles[CURRENT_INDEX]; const newPlan = generate14Day(p); p.plan = newPlan; profiles[CURRENT_INDEX]=p; saveProfiles(profiles); displayPlan(newPlan); }
-
-/* ---------- Download PDF (profile + week1 + week2, landscape single page scaled) ---------- */
-async function downloadPDF(){
-  if(CURRENT_INDEX===null){ alert('Open a profile first'); return; }
-  const profiles = loadProfiles(); const p = profiles[CURRENT_INDEX];
-
-  // prepare two tables for autoTable: Week1 rows and Week2 rows
-  const week = p.plan.week; // 14 days
-  const week1 = week.slice(0,7);
-  const week2 = week.slice(7,14);
-
-  // Build columns and rows per week: each day as multiple rows (Breakfast, Lunch, Snack A, Snack B, Dinner), but we will put them as a single row per meal for readability.
-  function buildRowsForWeek(w){
-    const rows = [];
-    w.forEach(d=>{
-      rows.push([
-        `Day ${d.day}`,
-        'Breakfast',
-        d.breakfast.name + (d.breakfast.serve ? ' ('+d.breakfast.serve+')':'' ),
-        Math.round(d.breakfast.cal),
-        Math.round(d.breakfast.protein),
-        Math.round(d.breakfast.carbs),
-        Math.round(d.breakfast.fat)
-      ]);
-      rows.push([
-        '',
-        'Lunch',
-        d.lunch.withRice.name + ' — ' + d.lunch.withRice.serve,
-        Math.round(d.lunch.withRice.cal),
-        Math.round(d.lunch.withRice.protein),
-        Math.round(d.lunch.withRice.carbs),
-        Math.round(d.lunch.withRice.fat)
-      ]);
-      if(d.snackA) rows.push(['','Snack A', d.snackA.name + ' ('+d.snackA.serve+')', Math.round(d.snackA.cal), Math.round(d.snackA.protein), Math.round(d.snackA.carbs), Math.round(d.snackA.fat)]);
-      if(d.snackB) rows.push(['','Snack B', d.snackB.name + ' ('+d.snackB.serve+')', Math.round(d.snackB.cal), Math.round(d.snackB.protein), Math.round(d.snackB.carbs), Math.round(d.snackB.fat)]);
-      rows.push(['','Dinner', d.dinner.name + (d.dinner.serve? ' ('+d.dinner.serve+')':''), Math.round(d.dinner.cal), Math.round(d.dinner.protein), Math.round(d.dinner.carbs), Math.round(d.dinner.fat)]);
-      // add daily totals row
-      rows.push(['','Daily total', '', Math.round(d.totals.cal), Math.round(d.totals.protein), Math.round(d.totals.carbs), Math.round(d.totals.fat)]);
-      // blank separator row
-      rows.push(['','','','','','','']);
-    });
-    return rows;
-  }
-
-  const rows1 = buildRowsForWeek(week1);
-  const rows2 = buildRowsForWeek(week2);
-
+function exportMealPlanPDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'landscape', unit:'pt', format:'a4' });
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const doc = new jsPDF();
 
-  // Header: profile card with small circular photo
-  const margin = 24;
-  let y = margin;
-  // draw profile photo if exists
-  if(p.photo){
-    // put small circle image
-    const imgWidth = 64;
-    doc.circle(margin + imgWidth/2, y + imgWidth/2, imgWidth/2, 'S');
-    // embed image inside circle (drawImage will draw a square; circle is decorative)
-    doc.addImage(p.photo, 'JPEG', margin, y, imgWidth, imgWidth);
-  }
-  // Name and meta
-  doc.setFontSize(16); doc.setTextColor(30,255,107);
-  doc.text(p.name, margin + 80, y + 20);
-  doc.setFontSize(10); doc.setTextColor(120,130,120);
-  doc.text(`Age: ${p.age} • Sex: ${p.sex} • Height: ${p.height} cm • Weight: ${p.weight} kg`, margin + 80, y + 40);
-  doc.text(`Goal: ${p.goal}`, margin + 80, y + 56);
-  y += 88;
+  doc.setFontSize(14);
+  doc.text("14-Day Pinoy Meal Plan", 14, 15);
 
-  // helper for autotable style
-  const commonStyles = { startY: y, margin:{left:margin, right:margin}, styles:{fontSize:9, cellPadding:4}, headStyles:{fillColor:[30,255,107], textColor:[0,0,0]}, alternateRowStyles:{fillColor:[245,245,245]} };
+  const rows = currentMealPlan.map(day => [
+    day.day,
+    `${day.breakfast.name}\n(${day.breakfast.cal} cal, ${day.breakfast.protein}g)`,
+    `${day.lunch.name}\n(${day.lunch.cal} cal, ${day.lunch.protein}g)`,
+    `${day.snack.name}\n(${day.snack.cal} cal, ${day.snack.protein}g)`,
+    `${day.dinner.name}\n(${day.dinner.cal} cal, ${day.dinner.protein}g)`,
+    day.totals.cal,
+    day.totals.protein
+  ]);
 
-  // Week 1 title
-  doc.setFontSize(12); doc.setTextColor(18,211,255);
-  doc.text('Week 1', margin, y - 4);
-
-  // AutoTable - Week1
   doc.autoTable({
-    head: [['Day','Meal','Details','kcal','P(g)','C(g)','F(g)']],
-    body: rows1,
-    ...commonStyles,
-    theme:'striped',
-    tableWidth: pageWidth - margin*2,
-    headStyles:{fillColor:[18,211,255], textColor:[0,0,0], halign:'left'},
-    didDrawPage: function (data) { /* nothing */ }
-  });
-  y = doc.lastAutoTable.finalY + 10;
-
-  // Week 2 title
-  doc.setFontSize(12); doc.setTextColor(18,211,255);
-  doc.text('Week 2', margin, y - 4);
-
-  // AutoTable - Week2 (ensure it fits - if not, it will continue to next page automatically)
-  doc.autoTable({
-    head: [['Day','Meal','Details','kcal','P(g)','C(g)','F(g)']],
-    body: rows2,
-    startY: y,
-    margin:{left:margin,right:margin},
-    styles:{fontSize:9, cellPadding:4},
-    theme:'striped',
-    tableWidth: pageWidth - margin*2,
-    headStyles:{fillColor:[18,211,255], textColor:[0,0,0], halign:'left'},
+    startY: 20,
+    head: [["Day", "Breakfast", "Lunch", "Snack", "Dinner", "Calories", "Protein (g)"]],
+    body: rows,
+    styles: { fontSize: 9, cellWidth: 'wrap' },
+    columnStyles: {
+      0: { cellWidth: 10 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 40 },
+      5: { cellWidth: 20 },
+      6: { cellWidth: 25 }
+    }
   });
 
-  // Save
-  const safeName = (p.name || 'client').replace(/\s+/g,'_').replace(/[^\w\-_.]/g,'');
-  doc.save(`${safeName}_14day_mealplan.pdf`);
+  doc.save("meal-plan.pdf");
 }
 
-/* ---------- Download current profile JSON ---------- */
-function downloadCurrent(){
-  if(CURRENT_INDEX===null){ alert('Open a profile first'); return; }
-  const profiles = loadProfiles(); const p = profiles[CURRENT_INDEX];
-  const dataStr = "data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(p,null,2));
-  const a = document.createElement('a'); a.href = dataStr; a.download = `${p.name.replace(/\s+/g,'_')}_plan.json`; document.body.appendChild(a); a.click(); a.remove();
-}
-
-/* ---------- Import ---------- */
-function importAll(){
-  const input = document.createElement('input'); input.type='file'; input.accept='.json';
-  input.onchange = e => {
-    const f = e.target.files[0]; if(!f) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if(!Array.isArray(data)) throw new Error('Invalid file format (expecting array of profiles)');
-        const existing = loadProfiles(); const merged = existing.concat(data);
-        saveProfiles(merged); renderProfiles(); alert('Imported '+data.length+' profiles');
-      } catch(err){ alert('Import failed: '+err.message); }
-    };
-    reader.readAsText(f);
-  };
-  input.click();
-}
-
-/* ---------- SVG thumb helper ---------- */
-function svgThumb(text, color='#1eff6b'){
-  const short = text.split(' ').slice(0,3).map(s=>s[0]||'').join('').toUpperCase();
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='320' height='220'>
-    <rect width='100%' height='100%' rx='12' fill='#071010'/>
-    <text x='50%' y='48%' text-anchor='middle' font-size='26' fill='${color}' font-family='Arial' font-weight='700'>${short}</text>
-    <text x='50%' y='72%' text-anchor='middle' font-size='12' fill='#bfeec8' font-family='Arial'>${escapeHtml(text)}</text>
-  </svg>`;
-  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-}
-
-/* ---------- Init ---------- */
 renderProfiles();
-clearForm();
-/* small guide */
-console.log('Pinoy 14-day meal planner loaded. Create a profile to generate a plan.');
 </script>
 </body>
 </html>
