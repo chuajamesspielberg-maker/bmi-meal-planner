@@ -1,263 +1,165 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Pinoy 14-Day Meal Planner (PDF + Nutrition)</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  h1, h2 { color: #2c3e50; }
-  .profile-list button { margin-left: 5px; }
-  table { border-collapse: collapse; margin-top: 10px; width: 100%; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
-  th { background: #ecf0f1; }
-  .meal-table { margin-top: 20px; }
-  .button-group button { margin: 5px; }
-  small { color: #555; }
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>14-Day Meal Plan</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<h1>Pinoy 14-Day Meal Planner</h1>
+  <h1>14-Day Meal Plan Generator</h1>
+  <button onclick="downloadPDF()">Download PDF</button>
 
-<div>
-  <h2>Create Profile</h2>
-  <label>Name: <input type="text" id="name"></label><br/>
-  <label>Age: <input type="number" id="age"></label><br/>
-  <label>Sex: 
-    <select id="sex">
-      <option>Male</option>
-      <option>Female</option>
-    </select>
-  </label><br/>
-  <label>Weight (kg): <input type="number" id="weight"></label><br/>
-  <label>Height (cm): <input type="number" id="height"></label><br/>
-  <label>Activity Level: 
-    <select id="activity">
-      <option value="1.2">Sedentary</option>
-      <option value="1.375">Lightly active</option>
-      <option value="1.55">Moderately active</option>
-      <option value="1.725">Very active</option>
-    </select>
-  </label><br/>
-  <button onclick="saveProfile()">Save Profile</button>
-</div>
+  <script>
+    const { jsPDF } = window.jspdf;
 
-<div>
-  <h2>Profiles</h2>
-  <div class="profile-list" id="profileList"></div>
-</div>
+    const profile = {
+      age: 37,
+      weight: 77,   // kg
+      height: 165,  // cm
+      gender: "male",
+      activity: "sedentary"  // sedentary, light, moderate, active, very_active
+    };
 
-<div class="button-group">
-  <button onclick="generateAndShowPlan()">Generate 14-Day Plan</button>
-  <button onclick="exportMealPlanPDF()">Export as PDF</button>
-</div>
-
-<div id="mealPlanTable"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-<script>
-let profiles = JSON.parse(localStorage.getItem("profiles") || "[]");
-let currentMealPlan = [];
-
-// Nutrition data
-const mealData = {
-  breakfast: {
-    "2 scoops Herbalife Formula 1 shake with 200ml Oatside milk": { cal: 250, protein: 17 }
-  },
-  lunch: {
-    "Grilled chicken breast with 1 cup rice": { cal: 450, protein: 35 },
-    "Beef stir-fry with 1 cup rice": { cal: 500, protein: 32 },
-    "Fish fillet with 1 cup rice": { cal: 420, protein: 30 },
-    "Tofu and vegetables with 1 cup rice": { cal: 380, protein: 22 },
-    "Pork adobo (lean cuts) with 1 cup rice": { cal: 460, protein: 32 },
-    "Chicken tinola with 1 cup rice": { cal: 400, protein: 34 },
-    "Grilled bangus with 1 cup rice": { cal: 430, protein: 29 },
-    "Ginisang ampalaya with egg + 1 cup rice": { cal: 390, protein: 24 },
-    "Chicken afritada with 1 cup rice": { cal: 440, protein: 33 },
-    "Beef tapa with 1 cup rice": { cal: 470, protein: 31 },
-    "Chicken curry (light coconut milk) with 1 cup rice": { cal: 450, protein: 32 },
-    "Sinigang na hipon with 1 cup rice": { cal: 400, protein: 28 },
-    "Pork sinigang with 1 cup rice": { cal: 470, protein: 30 },
-    "Grilled tilapia with 1 cup rice": { cal: 420, protein: 28 }
-  },
-  dinner: {
-    "2 scoops Herbalife Formula 1 shake with 200ml Oatside milk": { cal: 250, protein: 17 }
-  },
-  snack: {
-    "Banana": { cal: 105, protein: 1 },
-    "Egg": { cal: 78, protein: 6 },
-    "Banana + Egg": { cal: 183, protein: 7 },
-    "Salad": { cal: 120, protein: 3 },
-    "Greek yogurt (100g)": { cal: 60, protein: 10 },
-    "Apple": { cal: 95, protein: 0 },
-    "Peanut butter (1 tbsp) with cucumber slices": { cal: 120, protein: 4 }
-  }
-};
-
-function saveProfile() {
-  const name = document.getElementById("name").value;
-  const age = parseInt(document.getElementById("age").value);
-  const sex = document.getElementById("sex").value;
-  const weight = parseFloat(document.getElementById("weight").value);
-  const height = parseFloat(document.getElementById("height").value);
-  const activity = parseFloat(document.getElementById("activity").value);
-
-  if (!name || !age || !weight || !height) return alert("Fill all fields");
-
-  const profile = { name, age, sex, weight, height, activity };
-  profiles.push(profile);
-  localStorage.setItem("profiles", JSON.stringify(profiles));
-  renderProfiles();
-}
-
-function renderProfiles() {
-  const list = document.getElementById("profileList");
-  list.innerHTML = "";
-  profiles.forEach((p, i) => {
-    const div = document.createElement("div");
-    div.textContent = `${p.name} (${p.age} y/o, ${p.sex}) `;
-    const btn = document.createElement("button");
-    btn.textContent = "Use Profile";
-    btn.onclick = () => { generateAndShowPlan(p); };
-    div.appendChild(btn);
-    list.appendChild(div);
-  });
-}
-
-function generateMealPlan(profile) {
-  const breakfasts = Object.keys(mealData.breakfast);
-  const lunches = Object.keys(mealData.lunch);
-  const dinners = Object.keys(mealData.dinner);
-  const snacks = Object.keys(mealData.snack);
-
-  // Shuffle helper
-  function shuffle(array) {
-    let arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
-
-  // Shuffle all meals
-  let lunchCycle = shuffle(lunches);
-  let snackCycle = shuffle(snacks);
-
-  // Ensure enough for 14 days (expand if needed)
-  while (lunchCycle.length < 14) lunchCycle = lunchCycle.concat(shuffle(lunches));
-  while (snackCycle.length < 14) snackCycle = snackCycle.concat(shuffle(snacks));
-
-  let plan = [];
-  for (let i = 0; i < 14; i++) {
-    let breakfast = breakfasts[0];
-    let dinner = dinners[0];
-    let lunch = lunchCycle[i];
-    let snack = snackCycle[i];
-
-    plan.push({ 
-      day: i + 1, 
-      breakfast: { name: breakfast, ...mealData.breakfast[breakfast] },
-      lunch: { name: lunch, ...mealData.lunch[lunch] },
-      snack: { name: snack, ...mealData.snack[snack] },
-      dinner: { name: dinner, ...mealData.dinner[dinner] },
-      totals: {
-        cal: mealData.breakfast[breakfast].cal +
-             mealData.lunch[lunch].cal +
-             mealData.snack[snack].cal +
-             mealData.dinner[dinner].cal,
-        protein: mealData.breakfast[breakfast].protein +
-                 mealData.lunch[lunch].protein +
-                 mealData.snack[snack].protein +
-                 mealData.dinner[dinner].protein
+    const mealData = {
+      breakfast: {
+        "2 scoops Herbalife Formula 1 shake with 200ml Oatside milk": { cal: 250, protein: 17 }
+      },
+      lunch: {
+        "Grilled chicken breast with 1 cup rice": { cal: 450, protein: 35 },
+        "Beef stir-fry with 1 cup rice": { cal: 500, protein: 32 },
+        "Fish fillet with 1 cup rice": { cal: 420, protein: 30 },
+        "Tofu and vegetables with 1 cup rice": { cal: 380, protein: 22 },
+        "Pork adobo (lean cuts) with 1 cup rice": { cal: 460, protein: 32 },
+        "Chicken tinola with 1 cup rice": { cal: 400, protein: 34 },
+        "Grilled bangus with 1 cup rice": { cal: 430, protein: 29 },
+        "Ginisang ampalaya with egg + 1 cup rice": { cal: 390, protein: 24 },
+        "Chicken afritada with 1 cup rice": { cal: 440, protein: 33 },
+        "Beef tapa with 1 cup rice": { cal: 470, protein: 31 },
+        "Chicken curry (light coconut milk) with 1 cup rice": { cal: 450, protein: 32 },
+        "Sinigang na hipon with 1 cup rice": { cal: 400, protein: 28 },
+        "Pork sinigang with 1 cup rice": { cal: 470, protein: 30 },
+        "Grilled tilapia with 1 cup rice": { cal: 420, protein: 28 }
+      },
+      dinner: {
+        "2 scoops Herbalife Formula 1 shake with 200ml Oatside milk": { cal: 250, protein: 17 }
+      },
+      snack: {
+        "Banana": { cal: 105, protein: 1 },
+        "Egg": { cal: 78, protein: 6 },
+        "Banana + Egg": { cal: 183, protein: 7 },
+        "Salad": { cal: 120, protein: 3 },
+        "Greek yogurt (100g)": { cal: 60, protein: 10 },
+        "Apple": { cal: 95, protein: 0 },
+        "Peanut butter (1 tbsp) with cucumber slices": { cal: 120, protein: 4 }
       }
-    });
-  }
-  return plan;
-}
+    };
 
-function generateAndShowPlan(profile) {
-  if (!profile) profile = profiles[profiles.length - 1];
-  if (!profile) return alert("No profile found.");
+    // ---------- BMR + Calorie Needs ----------
+    function calculateBMR(profile) {
+      let { age, weight, height, gender, activity } = profile;
+      let bmr;
 
-  currentMealPlan = generateMealPlan(profile);
-  updateMealPlanTable();
-}
+      if (gender === "male") {
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      } else {
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      }
 
-function updateMealPlanTable() {
-  const tableContainer = document.getElementById("mealPlanTable");
-  tableContainer.innerHTML = "";
-  
-  const table = document.createElement("table");
-  table.classList.add("meal-table");
+      const activityLevels = {
+        sedentary: 1.2,
+        light: 1.375,
+        moderate: 1.55,
+        active: 1.725,
+        very_active: 1.9
+      };
 
-  const headerRow = `
-    <tr>
-      <th>Day</th>
-      <th>Breakfast</th>
-      <th>Lunch</th>
-      <th>Snack</th>
-      <th>Dinner</th>
-      <th>Total Calories</th>
-      <th>Total Protein (g)</th>
-    </tr>`;
-  table.innerHTML = headerRow;
+      let maintenance = bmr * activityLevels[activity];
+      let fatLoss = maintenance - 500;
+      let muscleGain = maintenance + 300;
 
-  currentMealPlan.forEach(day => {
-    const row = `
-      <tr>
-        <td>${day.day}</td>
-        <td>${day.breakfast.name} <br><small>${day.breakfast.cal} cal, ${day.breakfast.protein}g protein</small></td>
-        <td>${day.lunch.name} <br><small>${day.lunch.cal} cal, ${day.lunch.protein}g protein</small></td>
-        <td>${day.snack.name} <br><small>${day.snack.cal} cal, ${day.snack.protein}g protein</small></td>
-        <td>${day.dinner.name} <br><small>${day.dinner.cal} cal, ${day.dinner.protein}g protein</small></td>
-        <td>${day.totals.cal}</td>
-        <td>${day.totals.protein}</td>
-      </tr>`;
-    table.innerHTML += row;
-  });
-
-  tableContainer.appendChild(table);
-}
-
-function exportMealPlanPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFontSize(14);
-  doc.text("14-Day Pinoy Meal Plan", 14, 15);
-
-  const rows = currentMealPlan.map(day => [
-    day.day,
-    `${day.breakfast.name}\n(${day.breakfast.cal} cal, ${day.breakfast.protein}g)`,
-    `${day.lunch.name}\n(${day.lunch.cal} cal, ${day.lunch.protein}g)`,
-    `${day.snack.name}\n(${day.snack.cal} cal, ${day.snack.protein}g)`,
-    `${day.dinner.name}\n(${day.dinner.cal} cal, ${day.dinner.protein}g)`,
-    day.totals.cal,
-    day.totals.protein
-  ]);
-
-  doc.autoTable({
-    startY: 20,
-    head: [["Day", "Breakfast", "Lunch", "Snack", "Dinner", "Calories", "Protein (g)"]],
-    body: rows,
-    styles: { fontSize: 9, cellWidth: 'wrap' },
-    columnStyles: {
-      0: { cellWidth: 10 },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 40 },
-      3: { cellWidth: 30 },
-      4: { cellWidth: 40 },
-      5: { cellWidth: 20 },
-      6: { cellWidth: 25 }
+      return { bmr, maintenance, fatLoss, muscleGain };
     }
-  });
 
-  doc.save("meal-plan.pdf");
-}
+    // ---------- Meal Plan Generator ----------
+    function shuffle(array) {
+      let arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
 
-renderProfiles();
-</script>
+    function generateMealPlan(profile) {
+      const breakfasts = Object.keys(mealData.breakfast);
+      const lunches = Object.keys(mealData.lunch);
+      const dinners = Object.keys(mealData.dinner);
+      const snacks = Object.keys(mealData.snack);
+
+      // shuffle to create unique cycle
+      let lunchCycle = shuffle(lunches);
+      let snackCycle = shuffle(snacks);
+
+      // expand to 14 days
+      while (lunchCycle.length < 14) lunchCycle = lunchCycle.concat(shuffle(lunches));
+      while (snackCycle.length < 14) snackCycle = snackCycle.concat(shuffle(snacks));
+
+      let plan = [];
+      for (let i = 0; i < 14; i++) {
+        let breakfast = breakfasts[0];  // fixed shake
+        let dinner = dinners[0];        // fixed shake
+        let lunch = lunchCycle[i];
+        let snack = snackCycle[i];
+
+        plan.push({
+          day: i + 1,
+          breakfast: { name: breakfast, ...mealData.breakfast[breakfast] },
+          lunch: { name: lunch, ...mealData.lunch[lunch] },
+          snack: { name: snack, ...mealData.snack[snack] },
+          dinner: { name: dinner, ...mealData.dinner[dinner] },
+          totals: {
+            cal: mealData.breakfast[breakfast].cal +
+                 mealData.lunch[lunch].cal +
+                 mealData.snack[snack].cal +
+                 mealData.dinner[dinner].cal,
+            protein: mealData.breakfast[breakfast].protein +
+                     mealData.lunch[lunch].protein +
+                     mealData.snack[snack].protein +
+                     mealData.dinner[dinner].protein
+          }
+        });
+      }
+      return plan;
+    }
+
+    // ---------- PDF Generator ----------
+    function downloadPDF() {
+      const doc = new jsPDF();
+      let y = 10;
+
+      // show client calorie info
+      const calc = calculateBMR(profile);
+      doc.text(`BMR: ${calc.bmr.toFixed(0)} kcal/day`, 10, y); y += 10;
+      doc.text(`Maintenance Calories: ${calc.maintenance.toFixed(0)} kcal/day`, 10, y); y += 10;
+      doc.text(`Recommended for Fat Loss: ${calc.fatLoss.toFixed(0)} kcal/day`, 10, y); y += 10;
+      doc.text(`Recommended for Muscle Gain: ${calc.muscleGain.toFixed(0)} kcal/day`, 10, y); y += 20;
+
+      // meal plan
+      const plan = generateMealPlan(profile);
+      plan.forEach(day => {
+        doc.text(`Day ${day.day}`, 10, y); y += 8;
+        doc.text(`  Breakfast: ${day.breakfast.name} (${day.breakfast.cal} cal, ${day.breakfast.protein}g protein)`, 10, y); y += 8;
+        doc.text(`  Lunch: ${day.lunch.name} (${day.lunch.cal} cal, ${day.lunch.protein}g protein)`, 10, y); y += 8;
+        doc.text(`  Snack: ${day.snack.name} (${day.snack.cal} cal, ${day.snack.protein}g protein)`, 10, y); y += 8;
+        doc.text(`  Dinner: ${day.dinner.name} (${day.dinner.cal} cal, ${day.dinner.protein}g protein)`, 10, y); y += 8;
+        doc.text(`  Totals: ${day.totals.cal} cal, ${day.totals.protein}g protein`, 10, y); y += 12;
+
+        if (y > 270) { doc.addPage(); y = 10; }
+      });
+
+      doc.save("mealplan.pdf");
+    }
+  </script>
 </body>
 </html>
