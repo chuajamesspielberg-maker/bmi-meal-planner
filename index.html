@@ -54,6 +54,13 @@
     <option value="banana">Banana</option>
   </select><br>
 
+  <h3>Plan Goal</h3>
+  <select id="goal">
+    <option value="maintain">Maintain</option>
+    <option value="lose">Lose Weight</option>
+    <option value="gain">Gain Weight</option>
+  </select><br>
+
   <button class="btn" onclick="saveProfile()">Save Profile</button>
 
   <h2>Profile</h2>
@@ -61,24 +68,29 @@
 
   <h2>Meal Plan</h2>
   <button class="btn" onclick="generateMealPlan()">Generate 14-Day Meal Plan</button>
+  <button class="btn" onclick="downloadMealPlan()">Download Meal Plan (PDF)</button>
   <div id="mealPlan"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     let profile = null;
 
-    // Example food database with grams + auto macros
+    // Herbalife & meals with grams + macros
     const foodDB = {
       breakfast: [
-        { name: "Omelette", grams: "200g egg whites + 50g spinach", cal: 180, protein: 28, carbs: 3, fat: 6 },
-        { name: "Protein Oats", grams: "40g oats + 30g whey + 200ml milk", cal: 320, protein: 28, carbs: 35, fat: 8 }
+        { name: "Herbalife Shake", grams: "2 scoops Formula 1 + 200ml Oatside milk", cal: 220, protein: 17, carbs: 28, fat: 5 },
+        { name: "Herbalife Shake + Banana", grams: "2 scoops Formula 1 + 200ml milk + 1 banana", cal: 320, protein: 18, carbs: 55, fat: 6 },
+        { name: "Herbalife Shake + Oats", grams: "2 scoops Formula 1 + 200ml milk + 40g oats", cal: 350, protein: 20, carbs: 50, fat: 7 }
+      ],
+      dinner: [
+        { name: "Herbalife Shake", grams: "2 scoops Formula 1 + 200ml Oatside milk", cal: 220, protein: 17, carbs: 28, fat: 5 },
+        { name: "Herbalife Shake + Banana", grams: "2 scoops Formula 1 + 200ml milk + 1 banana", cal: 320, protein: 18, carbs: 55, fat: 6 },
+        { name: "Herbalife Shake + Oats", grams: "2 scoops Formula 1 + 200ml milk + 40g oats", cal: 350, protein: 20, carbs: 50, fat: 7 }
       ],
       lunch: [
         { name: "Grilled Chicken + Rice", grams: "150g chicken + 100g cooked rice + 50g broccoli", cal: 400, protein: 38, carbs: 30, fat: 8 },
-        { name: "Beef Stir Fry", grams: "120g lean beef + 150g veggies", cal: 350, protein: 32, carbs: 15, fat: 14 }
-      ],
-      dinner: [
-        { name: "Salmon + Veggies", grams: "130g salmon + 150g zucchini", cal: 360, protein: 34, carbs: 10, fat: 20 },
-        { name: "Chicken Salad", grams: "120g chicken + 80g lettuce + 30g dressing", cal: 310, protein: 32, carbs: 12, fat: 12 }
+        { name: "Beef Stir Fry", grams: "120g lean beef + 150g veggies", cal: 350, protein: 32, carbs: 15, fat: 14 },
+        { name: "Tofu + Rice", grams: "150g tofu + 100g rice + 100g veggies", cal: 380, protein: 25, carbs: 40, fat: 12 }
       ],
       snack: [
         { name: "Banana", grams: "120g", cal: 105, protein: 1, carbs: 27, fat: 0 },
@@ -89,11 +101,9 @@
     };
 
     function calculateBMR(weight, height, age, gender) {
-      if (gender === "male") {
-        return 10 * weight + 6.25 * height - 5 * age + 5;
-      } else {
-        return 10 * weight + 6.25 * height - 5 * age - 161;
-      }
+      return gender === "male"
+        ? 10 * weight + 6.25 * height - 5 * age + 5
+        : 10 * weight + 6.25 * height - 5 * age - 161;
     }
 
     function saveProfile() {
@@ -103,21 +113,30 @@
       const weight = parseFloat(document.getElementById("weight").value);
       const height = parseFloat(document.getElementById("height").value);
       const activity = parseFloat(document.getElementById("activity").value);
+      const goal = document.getElementById("goal").value;
 
       const bmr = calculateBMR(weight, height, age, gender);
       const maintain = Math.round(bmr * activity);
       const lose = maintain - 500;
       const gain = maintain + 500;
 
+      let targetCalories = maintain;
+      if (goal === "lose") targetCalories = lose;
+      if (goal === "gain") targetCalories = gain;
+
+      const proteinPct = parseInt(document.getElementById("proteinSplit").value);
+      const carbsPct = parseInt(document.getElementById("carbsSplit").value);
+      const fatPct = parseInt(document.getElementById("fatSplit").value);
+
+      const proteinTarget = Math.round((targetCalories * (proteinPct / 100)) / 4);
+      const carbsTarget = Math.round((targetCalories * (carbsPct / 100)) / 4);
+      const fatTarget = Math.round((targetCalories * (fatPct / 100)) / 9);
+
       profile = {
-        name, age, gender, weight, height, activity,
-        macroSplit: {
-          protein: parseInt(document.getElementById("proteinSplit").value),
-          carbs: parseInt(document.getElementById("carbsSplit").value),
-          fat: parseInt(document.getElementById("fatSplit").value)
-        },
+        name, age, gender, weight, height, activity, goal,
+        macroSplit: { protein: proteinPct, carbs: carbsPct, fat: fatPct },
         restrictions: Array.from(document.getElementById("restrictions").selectedOptions).map(opt => opt.value),
-        bmr, maintain, lose, gain
+        bmr, maintain, lose, gain, targetCalories, proteinTarget, carbsTarget, fatTarget
       };
 
       document.getElementById("profileInfo").innerText = `
@@ -127,8 +146,11 @@ Gender: ${profile.gender}
 Weight: ${profile.weight} kg
 Height: ${profile.height} cm
 Activity Factor: ${profile.activity}
+Goal: ${profile.goal.toUpperCase()}
 BMR: ${profile.bmr} kcal/day
 Calories: Maintain ${profile.maintain}, Weight Loss ${profile.lose}, Weight Gain ${profile.gain}
+Target Calories (for goal): ${profile.targetCalories}
+Target Macros: Protein ${profile.proteinTarget}g | Carbs ${profile.carbsTarget}g | Fat ${profile.fatTarget}g
 Macro Split: Protein ${profile.macroSplit.protein}%, Carbs ${profile.macroSplit.carbs}%, Fat ${profile.macroSplit.fat}%
 Restrictions: ${profile.restrictions.length ? profile.restrictions.join(", ") : "None"}
       `;
@@ -167,7 +189,8 @@ Restrictions: ${profile.restrictions.length ? profile.restrictions.join(", ") : 
           Lunch: ${meals.lunch.name} (${meals.lunch.grams})<br>
           Dinner: ${meals.dinner.name} (${meals.dinner.grams})<br>
           Snack: ${meals.snack.name} (${meals.snack.grams})<br><br>
-          <b>Daily Totals:</b> ${totals.cal} kcal | Protein: ${totals.protein}g | Carbs: ${totals.carbs}g | Fat: ${totals.fat}g
+          <b>Daily Totals:</b> ${totals.cal} kcal | Protein: ${totals.protein}g | Carbs: ${totals.carbs}g | Fat: ${totals.fat}g<br>
+          <b>Targets:</b> ${profile.targetCalories} kcal | Protein: ${profile.proteinTarget}g | Carbs: ${profile.carbsTarget}g | Fat: ${profile.fatTarget}g
         `;
         planDiv.appendChild(div);
       }
@@ -179,6 +202,33 @@ Restrictions: ${profile.restrictions.length ? profile.restrictions.join(", ") : 
         return !profile.restrictions.some(r => m.name.toLowerCase().includes(r));
       });
       return options[Math.floor(Math.random() * options.length)];
+    }
+
+    function downloadMealPlan() {
+      if (!profile) {
+        alert("Save profile and generate plan first!");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(12);
+      doc.text("Meal Plan", 10, 10);
+      doc.text(`Name: ${profile.name}`, 10, 20);
+      doc.text(`Goal: ${profile.goal}`, 10, 30);
+      doc.text(`BMR: ${profile.bmr} kcal`, 10, 40);
+      doc.text(`Target Calories: ${profile.targetCalories}`, 10, 50);
+      doc.text(`Macros: Protein ${profile.proteinTarget}g, Carbs ${profile.carbsTarget}g, Fat ${profile.fatTarget}g`, 10, 60);
+
+      let y = 70;
+      const days = document.querySelectorAll(".meal-day");
+      days.forEach((day, i) => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.text(day.innerText, 10, y);
+        y += 60;
+      });
+
+      doc.save("mealplan.pdf");
     }
   </script>
 </body>
