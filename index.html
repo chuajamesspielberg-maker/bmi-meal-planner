@@ -2,279 +2,193 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>14-Day Meal Plan Generator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { color: #2a4d69; }
-    label { display: block; margin-top: 10px; }
-    input, select { margin: 5px 0; padding: 5px; }
-    button { margin-top: 15px; padding: 10px 15px; background: #2a4d69; color: white; border: none; cursor: pointer; }
-    .results { margin-top: 30px; }
-    .day-plan { border-bottom: 1px solid #ccc; padding: 10px 0; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meal Planner</title>
 </head>
 <body>
-  <h1>14-Day Meal Plan Generator</h1>
+  <h2>Create Client Profile</h2>
+  <label>Name: <input type="text" id="name"></label><br>
+  <label>Age: <input type="number" id="age"></label><br>
+  <label>Gender: 
+    <select id="gender">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+  </label><br>
+  <label>Weight (kg): <input type="number" id="weight"></label><br>
+  <label>Height (cm): <input type="number" id="height"></label><br>
+  <label>Activity: 
+    <select id="activity">
+      <option value="sedentary">Sedentary</option>
+      <option value="light">Lightly Active</option>
+      <option value="moderate">Moderately Active</option>
+      <option value="active">Active</option>
+      <option value="very">Very Active</option>
+    </select>
+  </label><br>
 
-  <div>
-    <label>Age: <input type="number" id="age" value="37"></label>
-    <label>Weight (kg): <input type="number" id="weight" value="77"></label>
-    <label>Height (cm): <input type="number" id="height" value="165"></label>
-    
-    <label>Gender:
-      <select id="gender">
-        <option value="male" selected>Male</option>
-        <option value="female">Female</option>
-      </select>
-    </label>
+  <h3>Macro Split (%)</h3>
+  <label>Protein: <input type="number" id="proteinSplit" value="40"></label><br>
+  <label>Carbs: <input type="number" id="carbsSplit" value="40"></label><br>
+  <label>Fat: <input type="number" id="fatSplit" value="20"></label><br>
 
-    <label>Activity Level:
-      <select id="activity">
-        <option value="1.2">Sedentary</option>
-        <option value="1.375">Lightly Active</option>
-        <option value="1.55">Moderately Active</option>
-        <option value="1.725">Very Active</option>
-      </select>
-    </label>
+  <h3>Restrictions</h3>
+  <select id="restrictions" multiple>
+    <option value="meat">Meat</option>
+    <option value="pork">Pork</option>
+    <option value="chicken">Chicken</option>
+    <option value="fish">Fish</option>
+    <option value="veggies">Veggies</option>
+    <option value="rice">Rice</option>
+    <option value="dairy">Dairy</option>
+    <option value="eggs">Eggs</option>
+    <option value="gluten">Gluten</option>
+  </select><br><br>
 
-    <label>Goal:
-      <select id="goal">
-        <option value="maintain">Maintain</option>
-        <option value="loss">Fat Loss</option>
-        <option value="gain">Muscle Gain</option>
-      </select>
-    </label>
+  <button onclick="saveProfile()">Save Profile</button>
+  <div id="profileInfo"></div>
 
-    <label>Dietary Restrictions (check all that apply):</label>
-    <label><input type="checkbox" value="meat"> Avoid Meat</label>
-    <label><input type="checkbox" value="pork"> Avoid Pork</label>
-    <label><input type="checkbox" value="chicken"> Avoid Chicken</label>
-    <label><input type="checkbox" value="fish"> Avoid Fish</label>
-    <label><input type="checkbox" value="seafood"> Avoid Seafood</label>
-    <label><input type="checkbox" value="veggies"> Avoid Veggies</label>
-    <label><input type="checkbox" value="rice"> Avoid Rice</label>
-    <label><input type="checkbox" value="eggs"> Avoid Eggs</label>
-    <label><input type="checkbox" value="dairy"> Avoid Dairy</label>
-    <label><input type="checkbox" value="soy"> Avoid Soy/Tofu</label>
-    <label><input type="checkbox" value="gluten"> Avoid Gluten</label>
+  <h3>Meal Plan</h3>
+  <button onclick="generateMealPlan()">Generate 14-Day Plan</button>
+  <div id="mealPlan"></div>
 
-    <button onclick="generatePlan()">Generate 14-Day Plan</button>
-  </div>
-
-  <div class="results" id="results"></div>
   <button onclick="downloadPDF()">Download PDF</button>
 
-<script>
-// ---------- Nutrition DB per 100g ----------
-const nutritionDB = {
-  chickenBreast: { cal: 165, protein: 31 },
-  riceCooked: { cal: 130, protein: 2.5 },
-  salmon: { cal: 208, protein: 20 },
-  tilapia: { cal: 129, protein: 26 },
-  beefLean: { cal: 250, protein: 26 },
-  pork: { cal: 242, protein: 27 },
-  tofu: { cal: 76, protein: 8 },
-  sweetPotato: { cal: 86, protein: 1.6 },
-  broccoli: { cal: 55, protein: 3.7 },
-  veggies: { cal: 35, protein: 2 },
-  egg: { cal: 155, protein: 13 },
-  banana: { cal: 89, protein: 1.1 },
-  yogurtLowFat: { cal: 63, protein: 5 },
-  oats: { cal: 389, protein: 17 },
-  bread: { cal: 265, protein: 9 },
-  milk: { cal: 42, protein: 3.4 },
-  lettuce: { cal: 15, protein: 1.4 },
-  tomato: { cal: 18, protein: 0.9 },
-  cucumber: { cal: 16, protein: 0.7 },
-  fruit: { cal: 52, protein: 0.5 }
-};
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    let profile = null;
 
-// ---------- Meals ----------
-const meals = {
-  breakfast: [
-    { name: "Herbalife Shake", ingredients: [{ item: "milk", grams: 200 }] },
-    { name: "Oatmeal + Egg", ingredients: [{ item: "oats", grams: 40 }, { item: "egg", grams: 55 }] },
-    { name: "Tuna Sandwich", ingredients: [{ item: "bread", grams: 60 }, { item: "fish", grams: 80 }] },
-    { name: "Boiled Egg + Banana", ingredients: [{ item: "egg", grams: 110 }, { item: "banana", grams: 120 }] },
-    { name: "Yogurt + Fruit", ingredients: [{ item: "yogurtLowFat", grams: 150 }, { item: "fruit", grams: 80 }] }
-  ],
-  lunch: [
-    { name: "Grilled Chicken + Rice", ingredients: [{ item: "chickenBreast", grams: 150 }, { item: "riceCooked", grams: 100 }] },
-    { name: "Salmon + Veggies", ingredients: [{ item: "salmon", grams: 120 }, { item: "veggies", grams: 150 }] },
-    { name: "Beef + Rice", ingredients: [{ item: "beefLean", grams: 150 }, { item: "riceCooked", grams: 100 }] },
-    { name: "Chicken Adobo + Rice", ingredients: [{ item: "chickenBreast", grams: 150 }, { item: "riceCooked", grams: 100 }] },
-    { name: "Tofu + Veggies", ingredients: [{ item: "tofu", grams: 150 }, { item: "veggies", grams: 150 }] },
-    { name: "Pork Sinigang + Rice", ingredients: [{ item: "pork", grams: 150 }, { item: "riceCooked", grams: 100 }, { item: "veggies", grams: 150 }] }
-  ],
-  dinner: [
-    { name: "Herbalife Shake", ingredients: [{ item: "milk", grams: 200 }] },
-    { name: "Grilled Fish + Veggies", ingredients: [{ item: "tilapia", grams: 120 }, { item: "veggies", grams: 150 }] },
-    { name: "Chicken + Sweet Potato", ingredients: [{ item: "chickenBreast", grams: 150 }, { item: "sweetPotato", grams: 150 }] },
-    { name: "Tofu + Veggies", ingredients: [{ item: "tofu", grams: 150 }, { item: "veggies", grams: 150 }] },
-    { name: "Beef + Broccoli", ingredients: [{ item: "beefLean", grams: 150 }, { item: "broccoli", grams: 150 }] }
-  ],
-  snack: [
-    { name: "Banana", ingredients: [{ item: "banana", grams: 120 }] },
-    { name: "Boiled Egg", ingredients: [{ item: "egg", grams: 55 }] },
-    { name: "Banana + Egg", ingredients: [{ item: "banana", grams: 120 }, { item: "egg", grams: 55 }] },
-    { name: "Salad", ingredients: [{ item: "lettuce", grams: 100 }, { item: "tomato", grams: 50 }, { item: "cucumber", grams: 30 }] }
-  ]
-};
+    // nutrition database (per 100g)
+    const nutritionDB = {
+      chickenBreast: { cal: 165, protein: 31 },
+      riceCooked: { cal: 130, protein: 2.5 },
+      salmon: { cal: 208, protein: 20 },
+      egg: { cal: 155, protein: 13 },
+      banana: { cal: 89, protein: 1.1 },
+      tofu: { cal: 76, protein: 8 },
+      beefLean: { cal: 250, protein: 26 },
+      sweetPotato: { cal: 86, protein: 1.6 },
+      yogurtLowFat: { cal: 63, protein: 5 },
+      veggies: { cal: 35, protein: 2 },
+      bread: { cal: 265, protein: 9 },
+      oats: { cal: 389, protein: 17 }
+    };
 
-// ---------- Helpers ----------
-function calcMealNutrition(meal) {
-  let totalCal = 0, totalProtein = 0;
-  meal.ingredients.forEach(ing => {
-    const nut = nutritionDB[ing.item];
-    if (!nut) return;
-    totalCal += (nut.cal * ing.grams) / 100;
-    totalProtein += (nut.protein * ing.grams) / 100;
-  });
-  meal.cal = Math.round(totalCal);
-  meal.protein = Math.round(totalProtein);
-  meal.grams = meal.ingredients.map(ing => `${ing.grams}g ${ing.item}`).join(" + ");
-}
+    // meals
+    const mealDB = {
+      breakfast: [
+        { name: "Chicken Omelette", ingredients: [{ item: "egg", grams: 120 }, { item: "chickenBreast", grams: 80 }] },
+        { name: "Oats with Banana", ingredients: [{ item: "oats", grams: 50 }, { item: "banana", grams: 100 }] },
+        { name: "Yogurt + Sweet Potato", ingredients: [{ item: "yogurtLowFat", grams: 150 }, { item: "sweetPotato", grams: 100 }] }
+      ],
+      lunch: [
+        { name: "Grilled Chicken + Rice", ingredients: [{ item: "chickenBreast", grams: 150 }, { item: "riceCooked", grams: 100 }] },
+        { name: "Salmon + Veggies", ingredients: [{ item: "salmon", grams: 150 }, { item: "veggies", grams: 100 }] },
+        { name: "Beef + Sweet Potato", ingredients: [{ item: "beefLean", grams: 150 }, { item: "sweetPotato", grams: 120 }] }
+      ],
+      dinner: [
+        { name: "Chicken + Veggies", ingredients: [{ item: "chickenBreast", grams: 150 }, { item: "veggies", grams: 150 }] },
+        { name: "Tofu + Rice", ingredients: [{ item: "tofu", grams: 150 }, { item: "riceCooked", grams: 100 }] },
+        { name: "Salmon + Salad", ingredients: [{ item: "salmon", grams: 150 }, { item: "veggies", grams: 120 }] }
+      ],
+      snack: [
+        { name: "Banana", ingredients: [{ item: "banana", grams: 100 }] },
+        { name: "Boiled Egg", ingredients: [{ item: "egg", grams: 60 }] },
+        { name: "Banana + Egg", ingredients: [{ item: "banana", grams: 80 }, { item: "egg", grams: 60 }] },
+        { name: "Salad", ingredients: [{ item: "veggies", grams: 120 }] }
+      ]
+    };
 
-function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
-}
+    function calcMealNutrition(meal) {
+      let totalCal = 0, totalProtein = 0;
+      meal.ingredients.forEach(ing => {
+        const nut = nutritionDB[ing.item];
+        totalCal += (nut.cal * ing.grams) / 100;
+        totalProtein += (nut.protein * ing.grams) / 100;
+      });
+      meal.cal = Math.round(totalCal);
+      meal.protein = Math.round(totalProtein);
+      meal.grams = meal.ingredients.map(ing => `${ing.grams}g ${ing.item}`).join(" + ");
+    }
 
-function filterMeals(mealArray, restrictions) {
-  return mealArray.filter(meal => {
-    const ingNames = meal.ingredients.map(i => i.item.toLowerCase());
-    if (restrictions.includes("meat") && (ingNames.includes("chickenbreast") || ingNames.includes("pork") || ingNames.includes("beeflean") || ingNames.includes("fish") || ingNames.includes("salmon") || ingNames.includes("tilapia"))) return false;
-    if (restrictions.includes("pork") && ingNames.includes("pork")) return false;
-    if (restrictions.includes("chicken") && ingNames.includes("chickenbreast")) return false;
-    if (restrictions.includes("fish") && (ingNames.includes("fish") || ingNames.includes("salmon") || ingNames.includes("tilapia"))) return false;
-    if (restrictions.includes("seafood") && (ingNames.includes("fish") || ingNames.includes("salmon") || ingNames.includes("tilapia"))) return false;
-    if (restrictions.includes("veggies") && (ingNames.includes("veggies") || ingNames.includes("broccoli") || ingNames.includes("lettuce") || ingNames.includes("tomato") || ingNames.includes("cucumber"))) return false;
-    if (restrictions.includes("rice") && ingNames.includes("ricecooked")) return false;
-    if (restrictions.includes("eggs") && ingNames.includes("egg")) return false;
-    if (restrictions.includes("dairy") && (ingNames.includes("yogurtlowfat") || ingNames.includes("milk"))) return false;
-    if (restrictions.includes("soy") && ingNames.includes("tofu")) return false;
-    if (restrictions.includes("gluten") && (ingNames.includes("bread") || ingNames.includes("oats"))) return false;
-    return true;
-  });
-}
+    function saveProfile() {
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+      const gender = document.getElementById("gender").value;
+      const weight = parseFloat(document.getElementById("weight").value);
+      const height = parseFloat(document.getElementById("height").value);
+      const activity = document.getElementById("activity").value;
 
-// ---------- Main ----------
-let currentPlan = [];
+      profile = {
+        name,
+        age,
+        gender,
+        weight,
+        height,
+        activity,
+        macroSplit: {
+          protein: parseInt(document.getElementById("proteinSplit").value),
+          carbs: parseInt(document.getElementById("carbsSplit").value),
+          fat: parseInt(document.getElementById("fatSplit").value)
+        },
+        restrictions: Array.from(document.getElementById("restrictions").selectedOptions).map(opt => opt.value)
+      };
 
-function generatePlan() {
-  const age = +document.getElementById("age").value;
-  const weight = +document.getElementById("weight").value;
-  const height = +document.getElementById("height").value;
-  const gender = document.getElementById("gender").value;
-  const activity = +document.getElementById("activity").value;
-  const goal = document.getElementById("goal").value;
+      document.getElementById("profileInfo").innerText = `
+        Name: ${profile.name}
+        Age: ${profile.age}
+        Gender: ${profile.gender}
+        Weight: ${profile.weight} kg
+        Height: ${profile.height} cm
+        Activity: ${profile.activity}
+        Restrictions: ${profile.restrictions.length ? profile.restrictions.join(", ") : "None"}
+        Macro Split: P${profile.macroSplit.protein}% | C${profile.macroSplit.carbs}% | F${profile.macroSplit.fat}%
+      `;
+    }
 
-  const restrictionNodes = document.querySelectorAll("input[type=checkbox]:checked");
-  const restrictions = Array.from(restrictionNodes).map(cb => cb.value);
+    function generateMealPlan() {
+      if (!profile) {
+        alert("Save profile first!");
+        return;
+      }
+      let output = "";
+      for (let d = 1; d <= 14; d++) {
+        output += `<h4>Day ${d}</h4>`;
+        ["breakfast", "lunch", "dinner", "snack"].forEach(type => {
+          const meals = mealDB[type];
+          const meal = meals[(d - 1) % meals.length];
+          calcMealNutrition(meal);
+          output += `<b>${type}:</b> ${meal.name} (${meal.grams}) - ${meal.cal} kcal | ${meal.protein}g protein<br>`;
+        });
+      }
+      document.getElementById("mealPlan").innerHTML = output;
+    }
 
-  // Validate impossible combos
-  if (restrictions.includes("meat") && restrictions.includes("soy") && restrictions.includes("eggs") && restrictions.includes("dairy")) {
-    alert("⚠️ Restrictions too strict — no valid protein sources left.");
-    return;
-  }
+    async function downloadPDF() {
+      if (!profile) {
+        alert("Save profile first!");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
 
-  // BMR + TDEE
-  let BMR = gender === "male"
-    ? 10 * weight + 6.25 * height - 5 * age + 5
-    : 10 * weight + 6.25 * height - 5 * age - 161;
-  let TDEE = BMR * activity;
-  let targetCal = goal === "loss" ? TDEE - 500 : goal === "gain" ? TDEE + 500 : TDEE;
+      doc.text(`Meal Plan for ${profile.name}`, 10, y); y += 10;
 
-  currentPlan = [];
-
-  // filter + shuffle meals
-  const breakfasts = shuffle(filterMeals(meals.breakfast, restrictions));
-  const lunches = shuffle(filterMeals(meals.lunch, restrictions));
-  const dinners = shuffle(filterMeals(meals.dinner, restrictions));
-  const snacks = shuffle(filterMeals(meals.snack, restrictions));
-
-  for (let i = 0; i < 14; i++) {
-    const b = breakfasts[i % breakfasts.length];
-    const l = lunches[i % lunches.length];
-    const d = dinners[i % dinners.length];
-    const s = snacks[i % snacks.length];
-
-    [b, l, d, s].forEach(m => calcMealNutrition(m));
-
-    const totalCal = b.cal + l.cal + d.cal + s.cal;
-    const totalProtein = b.protein + l.protein + d.protein + s.protein;
-
-    currentPlan.push({
-      day: i + 1,
-      breakfast: b,
-      lunch: l,
-      dinner: d,
-      snack: s,
-      totalCal: totalCal,
-      totalProtein: totalProtein
-    });
-  }
-
-  // Display
-  const results = document.getElementById("results");
-  results.innerHTML = `
-    <h2>Client Results</h2>
-    <p><b>BMR:</b> ${Math.round(BMR)} kcal</p>
-    <p><b>Maintenance (TDEE):</b> ${Math.round(TDEE)} kcal</p>
-    <p><b>Target Calories:</b> ${Math.round(targetCal)} kcal (${goal})</p>
-    <h2>14-Day Meal Plan</h2>
-  `;
-
-  currentPlan.forEach(day => {
-    results.innerHTML += `
-      <div class="day-plan">
-        <h3>Day ${day.day}</h3>
-        <p><b>Breakfast:</b> ${day.breakfast.name} (${day.breakfast.grams})</p>
-        <p><b>Lunch:</b> ${day.lunch.name} (${day.lunch.grams})</p>
-        <p><b>Dinner:</b> ${day.dinner.name} (${day.dinner.grams})</p>
-        <p><b>Snack:</b> ${day.snack.name} (${day.snack.grams})</p>
-        <p><b>Calories:</b> ${day.totalCal} | <b>Protein:</b> ${day.totalProtein} g</p>
-      </div>
-    `;
-  });
-}
-
-// ---------- PDF ----------
-function downloadPDF() {
-  if (currentPlan.length === 0) {
-    alert("No plan generated yet.");
-    return;
-  }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFontSize(16);
-  doc.text("14-Day Meal Plan", 14, 20);
-
-  let rows = [];
-  currentPlan.forEach(day => {
-    rows.push([
-      "Day " + day.day,
-      `${day.breakfast.name} (${day.breakfast.grams})`,
-      `${day.lunch.name} (${day.lunch.grams})`,
-      `${day.dinner.name} (${day.dinner.grams})`,
-      `${day.snack.name} (${day.snack.grams})`,
-      day.totalCal + " cal",
-      day.totalProtein + " g P"
-    ]);
-  });
-
-  doc.autoTable({
-    head: [["Day", "Breakfast", "Lunch", "Dinner", "Snack", "Calories", "Protein"]],
-    body: rows,
-    startY: 30,
-    styles: { fontSize: 8, cellWidth: "wrap" },
-    columnStyles: { 0: { cellWidth: 10 } }
-  });
-
-  doc.save("meal_plan.pdf");
-}
-</script>
+      for (let d = 1; d <= 14; d++) {
+        doc.text(`Day ${d}`, 10, y); y += 8;
+        ["breakfast", "lunch", "dinner", "snack"].forEach(type => {
+          const meals = mealDB[type];
+          const meal = meals[(d - 1) % meals.length];
+          calcMealNutrition(meal);
+          doc.text(`${type}: ${meal.name} (${meal.grams}) - ${meal.cal} kcal | ${meal.protein}g protein`, 10, y);
+          y += 8;
+          if (y > 280) { doc.addPage(); y = 10; }
+        });
+        y += 5;
+      }
+      doc.save("MealPlan.pdf");
+    }
+  </script>
 </body>
-</html>
+</html>o
