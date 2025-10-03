@@ -1,299 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>14-Day Pinoy Meal Plan Generator</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-  h1 { color: #2c3e50; }
-  .box { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; 
-         box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
-  label { display: block; margin: 6px 0; }
-  input, select { margin-left: 10px; }
-  button { margin: 5px; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; background: #3498db; color: #fff; }
-  button:hover { background: #2980b9; }
-  table { border-collapse: collapse; width: 100%; margin-top: 15px;}
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px;}
-  th { background: #ecf0f1;}
-  .row { display:flex; gap:10px; }
-</style>
+  <meta charset="UTF-8">
+  <title>14-Day Meal Plan Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #2a4d69; }
+    label { display: block; margin-top: 10px; }
+    input, select { margin: 5px 0; padding: 5px; }
+    button { margin-top: 15px; padding: 10px 15px; background: #2a4d69; color: white; border: none; cursor: pointer; }
+    .results { margin-top: 30px; }
+    .day-plan { border-bottom: 1px solid #ccc; padding: 10px 0; }
+  </style>
 </head>
 <body>
+  <h1>14-Day Meal Plan Generator</h1>
 
-<h1>14-Day Pinoy Meal Plan Generator</h1>
+  <div>
+    <label>Age: <input type="number" id="age" value="37"></label>
+    <label>Weight (kg): <input type="number" id="weight" value="77"></label>
+    <label>Height (cm): <input type="number" id="height" value="165"></label>
+    
+    <label>Gender:
+      <select id="gender">
+        <option value="male" selected>Male</option>
+        <option value="female">Female</option>
+      </select>
+    </label>
 
-<div class="box">
-  <h3>Client Profile</h3>
-  <label>Name: <input id="name"></label>
-  <label>Age: <input id="age" type="number"></label>
-  <label>Weight (kg): <input id="weight" type="number"></label>
-  <label>Height (cm): <input id="height" type="number"></label>
-  <label>Gender:
-    <select id="gender">
-      <option value="male">Male</option>
-      <option value="female">Female</option>
-    </select>
-  </label>
-  <label>Activity Level:
-    <select id="activity">
-      <option value="sedentary">Sedentary</option>
-      <option value="light">Light</option>
-      <option value="moderate">Moderate</option>
-      <option value="active">Active</option>
-      <option value="veryActive">Very Active</option>
-    </select>
-  </label>
-  <label>Default Target Goal:
-    <select id="targetGoal">
-      <option value="maintenance">Maintenance</option>
-      <option value="fatLoss">Fat Loss</option>
-      <option value="muscleGain">Muscle Gain</option>
-    </select>
-  </label>
-  <button onclick="saveProfile()">Save Profile</button>
-</div>
+    <label>Activity Level:
+      <select id="activity">
+        <option value="1.2">Sedentary</option>
+        <option value="1.375">Lightly Active</option>
+        <option value="1.55">Moderately Active</option>
+        <option value="1.725">Very Active</option>
+      </select>
+    </label>
 
-<div class="box">
-  <h3>Saved Profiles</h3>
-  <select id="profileList"></select>
-  <button onclick="loadProfile()">Load</button>
-  <button onclick="deleteProfile()">Delete</button>
-  <button onclick="editProfile()">Edit</button>
-</div>
+    <label>Goal:
+      <select id="goal">
+        <option value="maintain">Maintain</option>
+        <option value="loss">Fat Loss</option>
+        <option value="gain">Muscle Gain</option>
+      </select>
+    </label>
 
-<div class="box">
-  <h3>Plan Options</h3>
-  <label>
-    Goal Override (optional):
-    <select id="goalOverride">
-      <option value="">-- use profile goal --</option>
-      <option value="maintenance">Maintenance</option>
-      <option value="fatLoss">Fat Loss</option>
-      <option value="muscleGain">Muscle Gain</option>
-    </select>
-  </label>
-  <label class="row">
-    <span style="flex:1">Protein %: <input id="macroP" type="number" value="30" min="0" max="100"></span>
-    <span style="flex:1">Carbs %: <input id="macroC" type="number" value="40" min="0" max="100"></span>
-    <span style="flex:1">Fats %: <input id="macroF" type="number" value="30" min="0" max="100"></span>
-  </label>
-  <small>(Must total 100%)</small>
-</div>
+    <label>Dietary Restrictions (check all that apply):</label>
+    <label><input type="checkbox" value="meat"> Avoid Meat</label>
+    <label><input type="checkbox" value="pork"> Avoid Pork</label>
+    <label><input type="checkbox" value="chicken"> Avoid Chicken</label>
+    <label><input type="checkbox" value="fish"> Avoid Fish</label>
+    <label><input type="checkbox" value="seafood"> Avoid Seafood</label>
+    <label><input type="checkbox" value="veggies"> Avoid Veggies</label>
+    <label><input type="checkbox" value="rice"> Avoid Rice</label>
+    <label><input type="checkbox" value="eggs"> Avoid Eggs</label>
+    <label><input type="checkbox" value="dairy"> Avoid Dairy</label>
+    <label><input type="checkbox" value="soy"> Avoid Soy/Tofu</label>
+    <label><input type="checkbox" value="gluten"> Avoid Gluten</label>
 
-<div class="box">
-  <h3>Dietary Restrictions</h3>
-  <label><input type="checkbox" class="restriction" value="meat"> Avoid Meat</label>
-  <label><input type="checkbox" class="restriction" value="pork"> Avoid Pork</label>
-  <label><input type="checkbox" class="restriction" value="chicken"> Avoid Chicken</label>
-  <label><input type="checkbox" class="restriction" value="fish"> Avoid Fish</label>
-  <label><input type="checkbox" class="restriction" value="seafood"> Avoid Seafood</label>
-  <label><input type="checkbox" class="restriction" value="veggies"> Avoid Veggies</label>
-  <label><input type="checkbox" class="restriction" value="rice"> Avoid Rice</label>
-  <label><input type="checkbox" class="restriction" value="eggs"> Avoid Eggs</label>
-  <label><input type="checkbox" class="restriction" value="dairy"> Avoid Dairy</label>
-  <label><input type="checkbox" class="restriction" value="soy"> Avoid Soy/Tofu</label>
-  <label><input type="checkbox" class="restriction" value="gluten"> Avoid Gluten</label>
-</div>
+    <button onclick="generatePlan()">Generate 14-Day Plan</button>
+  </div>
 
-<div class="box">
-  <button onclick="generatePlan()">Generate 14-Day Meal Plan</button>
+  <div class="results" id="results"></div>
   <button onclick="downloadPDF()">Download PDF</button>
-</div>
-
-<div class="box" id="bmrResults"></div>
-<div class="box" id="mealPlan"></div>
 
 <script>
-let profiles = JSON.parse(localStorage.getItem("profiles") || "[]");
+// ---------- Nutrition DB per 100g ----------
+const nutritionDB = {
+  chickenBreast: { cal: 165, protein: 31 },
+  riceCooked: { cal: 130, protein: 2.5 },
+  salmon: { cal: 208, protein: 20 },
+  tilapia: { cal: 129, protein: 26 },
+  beefLean: { cal: 250, protein: 26 },
+  pork: { cal: 242, protein: 27 },
+  tofu: { cal: 76, protein: 8 },
+  sweetPotato: { cal: 86, protein: 1.6 },
+  broccoli: { cal: 55, protein: 3.7 },
+  veggies: { cal: 35, protein: 2 },
+  egg: { cal: 155, protein: 13 },
+  banana: { cal: 89, protein: 1.1 },
+  yogurtLowFat: { cal: 63, protein: 5 },
+  oats: { cal: 389, protein: 17 },
+  bread: { cal: 265, protein: 9 },
+  milk: { cal: 42, protein: 3.4 },
+  lettuce: { cal: 15, protein: 1.4 },
+  tomato: { cal: 18, protein: 0.9 },
+  cucumber: { cal: 16, protein: 0.7 },
+  fruit: { cal: 52, protein: 0.5 }
+};
+
+// ---------- Meals ----------
+const meals = {
+  breakfast: [
+    { name: "Herbalife Shake", ingredients: [{ item: "milk", grams: 200 }] },
+    { name: "Oatmeal + Egg", ingredients: [{ item: "oats", grams: 40 }, { item: "egg", grams: 55 }] },
+    { name: "Tuna Sandwich", ingredients: [{ item: "bread", grams: 60 }, { item: "fish", grams: 80 }] },
+    { name: "Boiled Egg + Banana", ingredients: [{ item: "egg", grams: 110 }, { item: "banana", grams: 120 }] },
+    { name: "Yogurt + Fruit", ingredients: [{ item: "yogurtLowFat", grams: 150 }, { item: "fruit", grams: 80 }] }
+  ],
+  lunch: [
+    { name: "Grilled Chicken + Rice", ingredients: [{ item: "chickenBreast", grams: 150 }, { item: "riceCooked", grams: 100 }] },
+    { name: "Salmon + Veggies", ingredients: [{ item: "salmon", grams: 120 }, { item: "veggies", grams: 150 }] },
+    { name: "Beef + Rice", ingredients: [{ item: "beefLean", grams: 150 }, { item: "riceCooked", grams: 100 }] },
+    { name: "Chicken Adobo + Rice", ingredients: [{ item: "chickenBreast", grams: 150 }, { item: "riceCooked", grams: 100 }] },
+    { name: "Tofu + Veggies", ingredients: [{ item: "tofu", grams: 150 }, { item: "veggies", grams: 150 }] },
+    { name: "Pork Sinigang + Rice", ingredients: [{ item: "pork", grams: 150 }, { item: "riceCooked", grams: 100 }, { item: "veggies", grams: 150 }] }
+  ],
+  dinner: [
+    { name: "Herbalife Shake", ingredients: [{ item: "milk", grams: 200 }] },
+    { name: "Grilled Fish + Veggies", ingredients: [{ item: "tilapia", grams: 120 }, { item: "veggies", grams: 150 }] },
+    { name: "Chicken + Sweet Potato", ingredients: [{ item: "chickenBreast", grams: 150 }, { item: "sweetPotato", grams: 150 }] },
+    { name: "Tofu + Veggies", ingredients: [{ item: "tofu", grams: 150 }, { item: "veggies", grams: 150 }] },
+    { name: "Beef + Broccoli", ingredients: [{ item: "beefLean", grams: 150 }, { item: "broccoli", grams: 150 }] }
+  ],
+  snack: [
+    { name: "Banana", ingredients: [{ item: "banana", grams: 120 }] },
+    { name: "Boiled Egg", ingredients: [{ item: "egg", grams: 55 }] },
+    { name: "Banana + Egg", ingredients: [{ item: "banana", grams: 120 }, { item: "egg", grams: 55 }] },
+    { name: "Salad", ingredients: [{ item: "lettuce", grams: 100 }, { item: "tomato", grams: 50 }, { item: "cucumber", grams: 30 }] }
+  ]
+};
+
+// ---------- Helpers ----------
+function calcMealNutrition(meal) {
+  let totalCal = 0, totalProtein = 0;
+  meal.ingredients.forEach(ing => {
+    const nut = nutritionDB[ing.item];
+    if (!nut) return;
+    totalCal += (nut.cal * ing.grams) / 100;
+    totalProtein += (nut.protein * ing.grams) / 100;
+  });
+  meal.cal = Math.round(totalCal);
+  meal.protein = Math.round(totalProtein);
+  meal.grams = meal.ingredients.map(ing => `${ing.grams}g ${ing.item}`).join(" + ");
+}
+
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+function filterMeals(mealArray, restrictions) {
+  return mealArray.filter(meal => {
+    const ingNames = meal.ingredients.map(i => i.item.toLowerCase());
+    if (restrictions.includes("meat") && (ingNames.includes("chickenbreast") || ingNames.includes("pork") || ingNames.includes("beeflean") || ingNames.includes("fish") || ingNames.includes("salmon") || ingNames.includes("tilapia"))) return false;
+    if (restrictions.includes("pork") && ingNames.includes("pork")) return false;
+    if (restrictions.includes("chicken") && ingNames.includes("chickenbreast")) return false;
+    if (restrictions.includes("fish") && (ingNames.includes("fish") || ingNames.includes("salmon") || ingNames.includes("tilapia"))) return false;
+    if (restrictions.includes("seafood") && (ingNames.includes("fish") || ingNames.includes("salmon") || ingNames.includes("tilapia"))) return false;
+    if (restrictions.includes("veggies") && (ingNames.includes("veggies") || ingNames.includes("broccoli") || ingNames.includes("lettuce") || ingNames.includes("tomato") || ingNames.includes("cucumber"))) return false;
+    if (restrictions.includes("rice") && ingNames.includes("ricecooked")) return false;
+    if (restrictions.includes("eggs") && ingNames.includes("egg")) return false;
+    if (restrictions.includes("dairy") && (ingNames.includes("yogurtlowfat") || ingNames.includes("milk"))) return false;
+    if (restrictions.includes("soy") && ingNames.includes("tofu")) return false;
+    if (restrictions.includes("gluten") && (ingNames.includes("bread") || ingNames.includes("oats"))) return false;
+    return true;
+  });
+}
+
+// ---------- Main ----------
 let currentPlan = [];
 
-function refreshProfileList(){
-  const list = document.getElementById("profileList");
-  list.innerHTML = "";
-  profiles.forEach((p,i)=>{
-    let opt = document.createElement("option");
-    opt.value=i; opt.text=p.name;
-    list.add(opt);
-  });
-}
+function generatePlan() {
+  const age = +document.getElementById("age").value;
+  const weight = +document.getElementById("weight").value;
+  const height = +document.getElementById("height").value;
+  const gender = document.getElementById("gender").value;
+  const activity = +document.getElementById("activity").value;
+  const goal = document.getElementById("goal").value;
 
-function saveProfile(){
-  const p = {
-    name: name.value, age:+age.value, weight:+weight.value, height:+height.value,
-    gender: gender.value, activity: activity.value, targetGoal: targetGoal.value
-  };
-  profiles.push(p);
-  localStorage.setItem("profiles", JSON.stringify(profiles));
-  refreshProfileList();
-}
-function loadProfile(){
-  const idx=profileList.value;
-  if(idx==="")return;
-  const p=profiles[idx];
-  name.value=p.name; age.value=p.age; weight.value=p.weight; height.value=p.height;
-  gender.value=p.gender; activity.value=p.activity; targetGoal.value=p.targetGoal;
-}
-function deleteProfile(){
-  const idx=profileList.value;
-  if(idx==="")return;
-  profiles.splice(idx,1);
-  localStorage.setItem("profiles", JSON.stringify(profiles));
-  refreshProfileList();
-}
-function editProfile(){
-  const idx=profileList.value;
-  if(idx==="")return;
-  profiles[idx]={ name:name.value, age:+age.value, weight:+weight.value, height:+height.value,
-    gender:gender.value, activity:activity.value, targetGoal:targetGoal.value};
-  localStorage.setItem("profiles", JSON.stringify(profiles));
-  refreshProfileList();
-}
+  const restrictionNodes = document.querySelectorAll("input[type=checkbox]:checked");
+  const restrictions = Array.from(restrictionNodes).map(cb => cb.value);
 
-function getMacrosFromCalories(cal, split){ 
-  const pCal=cal*(split.p/100), cCal=cal*(split.c/100), fCal=cal*(split.f/100);
-  return {protein_g:Math.round(pCal/4), carbs_g:Math.round(cCal/4), fats_g:Math.round(fCal/9)};
-}
-
-function calculateBMR(profile, split){
-  const {age,weight,height,gender}=profile;
-  let bmr=(gender==="male")?(10*weight+6.25*height-5*age+5):(10*weight+6.25*height-5*age-161);
-  let factor=1.2;
-  if(profile.activity==="light")factor=1.375;
-  if(profile.activity==="moderate")factor=1.55;
-  if(profile.activity==="active")factor=1.725;
-  if(profile.activity==="veryActive")factor=1.9;
-  const maintenance=Math.round(bmr*factor);
-  const fatLoss=Math.max(1200,Math.round(maintenance-500));
-  const muscleGain=Math.round(maintenance+500);
-  return {
-    bmr:Math.round(bmr),maintenance,fatLoss,muscleGain,
-    macros:{
-      maintenance:getMacrosFromCalories(maintenance,split),
-      fatLoss:getMacrosFromCalories(fatLoss,split),
-      muscleGain:getMacrosFromCalories(muscleGain,split)
-    }
-  };
-}
-
-// Meals DB
-const breakfastOptions=[{name:"Herbalife Shake + Oatside Milk",cal:250,protein:15}];
-const lunchOptions=[
- {name:"Grilled Chicken + Rice",cal:450,protein:35,tags:["chicken","meat","rice"]},
- {name:"Fish Fillet + Veggies",cal:400,protein:30,tags:["fish","seafood","meat","veggies"]},
- {name:"Tofu Stir Fry",cal:380,protein:22,tags:["soy","veggies"]},
- {name:"Lean Pork + Rice",cal:460,protein:33,tags:["pork","meat","rice"]},
- {name:"Veggie Salad + Egg",cal:350,protein:18,tags:["veggies","eggs"]}
-];
-const dinnerOptions=[{name:"Herbalife Shake + Oatside Milk",cal:250,protein:15}];
-const snackOptions=[
- {name:"Banana",cal:105,protein:1,tags:[]},
- {name:"Boiled Egg",cal:78,protein:6,tags:["eggs"]},
- {name:"Apple",cal:95,protein:0,tags:[]},
- {name:"Tuna (water-packed)",cal:120,protein:26,tags:["fish","seafood","meat"]},
- {name:"Avocado",cal:160,protein:2,tags:[]}
-];
-
-// Plan Generator
-function generatePlan(){
-  const idx=profileList.value;
-  if(idx===""){alert("Select profile first");return;}
-  const profile=profiles[idx];
-  const override=goalOverride.value;
-  const split={p:+macroP.value||30,c:+macroC.value||40,f:+macroF.value||30};
-  if(split.p+split.c+split.f!==100){alert("Macro split must total 100%");return;}
-  const restrictions=[...document.querySelectorAll(".restriction:checked")].map(r=>r.value);
-  
-  // Hard-block impossible combos
-  if(restrictions.includes("meat")&&restrictions.includes("fish")&&restrictions.includes("seafood")&&restrictions.includes("soy")&&restrictions.includes("eggs")&&restrictions.includes("dairy")){
-    alert("⚠️ Restrictions too strict — no valid protein sources left.");return;
-  }
-  if(restrictions.includes("rice")&&restrictions.includes("gluten")&&restrictions.includes("veggies")){
-    alert("⚠️ Restrictions too strict — no valid carb sources left.");return;
+  // Validate impossible combos
+  if (restrictions.includes("meat") && restrictions.includes("soy") && restrictions.includes("eggs") && restrictions.includes("dairy")) {
+    alert("⚠️ Restrictions too strict — no valid protein sources left.");
+    return;
   }
 
-  const calc=calculateBMR(profile,split);
-  const goal=override||profile.targetGoal;
-  let targetCalories=calc[goal==="fatLoss"?"fatLoss":(goal==="muscleGain"?"muscleGain":"maintenance")];
-  let targetMacros=calc.macros[goal];
+  // BMR + TDEE
+  let BMR = gender === "male"
+    ? 10 * weight + 6.25 * height - 5 * age + 5
+    : 10 * weight + 6.25 * height - 5 * age - 161;
+  let TDEE = BMR * activity;
+  let targetCal = goal === "loss" ? TDEE - 500 : goal === "gain" ? TDEE + 500 : TDEE;
 
-  document.getElementById("bmrResults").innerHTML=
-    `<h3>BMR & Calorie Targets</h3>
-     <p>BMR: ${calc.bmr} kcal</p>
-     <p>Maintenance: ${calc.maintenance} kcal</p>
-     <p>Fat Loss: ${calc.fatLoss} kcal</p>
-     <p>Muscle Gain: ${calc.muscleGain} kcal</p>
-     <p>Goal: ${goal} — ${targetCalories} kcal</p>
-     <p>Macros: Protein ${targetMacros.protein_g}g, Carbs ${targetMacros.carbs_g}g, Fats ${targetMacros.fats_g}g</p>`;
+  currentPlan = [];
 
-  // Filter meals
-  function filterMeals(list){
-    return list.filter(m=>{
-      if(!m.tags)return true;
-      return !m.tags.some(t=>restrictions.includes(t));
+  // filter + shuffle meals
+  const breakfasts = shuffle(filterMeals(meals.breakfast, restrictions));
+  const lunches = shuffle(filterMeals(meals.lunch, restrictions));
+  const dinners = shuffle(filterMeals(meals.dinner, restrictions));
+  const snacks = shuffle(filterMeals(meals.snack, restrictions));
+
+  for (let i = 0; i < 14; i++) {
+    const b = breakfasts[i % breakfasts.length];
+    const l = lunches[i % lunches.length];
+    const d = dinners[i % dinners.length];
+    const s = snacks[i % snacks.length];
+
+    [b, l, d, s].forEach(m => calcMealNutrition(m));
+
+    const totalCal = b.cal + l.cal + d.cal + s.cal;
+    const totalProtein = b.protein + l.protein + d.protein + s.protein;
+
+    currentPlan.push({
+      day: i + 1,
+      breakfast: b,
+      lunch: l,
+      dinner: d,
+      snack: s,
+      totalCal: totalCal,
+      totalProtein: totalProtein
     });
   }
-  const lunches=filterMeals(lunchOptions);
-  const dinners=filterMeals(dinnerOptions);
-  const snacks=filterMeals(snackOptions);
-  const breakfasts=filterMeals(breakfastOptions);
-  if(lunches.length===0||dinners.length===0||snacks.length===0){alert("Restrictions too strict for available meals.");return;}
 
-  currentPlan=[];
-  for(let d=1;d<=14;d++){
-    let b=breakfasts[0];
-    let l=lunches[(d-1)%lunches.length];
-    let dn=dinners[0];
-    let s=snacks[(d-1)%snacks.length];
-    let totalCal=b.cal+l.cal+dn.cal+s.cal;
-    let totalProtein=b.protein+l.protein+dn.protein+s.protein;
+  // Display
+  const results = document.getElementById("results");
+  results.innerHTML = `
+    <h2>Client Results</h2>
+    <p><b>BMR:</b> ${Math.round(BMR)} kcal</p>
+    <p><b>Maintenance (TDEE):</b> ${Math.round(TDEE)} kcal</p>
+    <p><b>Target Calories:</b> ${Math.round(targetCal)} kcal (${goal})</p>
+    <h2>14-Day Meal Plan</h2>
+  `;
 
-    // silent adjustments
-    while(totalCal<targetCalories*0.9 || totalProtein<targetMacros.protein_g*0.9){
-      if(totalProtein<targetMacros.protein_g*0.9 && !restrictions.includes("eggs")){
-        totalCal+=78; totalProtein+=6; // egg
-      } else if(totalProtein<targetMacros.protein_g*0.9 && !restrictions.includes("fish")){
-        totalCal+=120; totalProtein+=26; // tuna
-      } else if(totalCal<targetCalories*0.9){
-        totalCal+=95; // apple as filler carb
-      } else break;
-    }
-
-    currentPlan.push({day:d,breakfast:b,lunch:l,dinner:dn,snack:s,totalCal,totalProtein});
-  }
-
-  // Render
-  let html="<table><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snack</th><th>Calories</th><th>Protein</th></tr>";
-  currentPlan.forEach(day=>{
-    html+=`<tr><td>${day.day}</td><td>${day.breakfast.name}</td><td>${day.lunch.name}</td><td>${day.dinner.name}</td><td>${day.snack.name}</td><td>${day.totalCal}</td><td>${day.totalProtein}g</td></tr>`;
+  currentPlan.forEach(day => {
+    results.innerHTML += `
+      <div class="day-plan">
+        <h3>Day ${day.day}</h3>
+        <p><b>Breakfast:</b> ${day.breakfast.name} (${day.breakfast.grams})</p>
+        <p><b>Lunch:</b> ${day.lunch.name} (${day.lunch.grams})</p>
+        <p><b>Dinner:</b> ${day.dinner.name} (${day.dinner.grams})</p>
+        <p><b>Snack:</b> ${day.snack.name} (${day.snack.grams})</p>
+        <p><b>Calories:</b> ${day.totalCal} | <b>Protein:</b> ${day.totalProtein} g</p>
+      </div>
+    `;
   });
-  html+="</table>";
-  document.getElementById("mealPlan").innerHTML=html;
 }
 
-// Shuffle helper (unused now but kept if needed)
-function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+// ---------- PDF ----------
+function downloadPDF() {
+  if (currentPlan.length === 0) {
+    alert("No plan generated yet.");
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-// PDF Export
-function downloadPDF(){
-  if(currentPlan.length===0){alert("No plan generated yet.");return;}
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF();
   doc.setFontSize(16);
-  doc.text("14-Day Pinoy Meal Plan",14,20);
-  let rows=[];
-  currentPlan.forEach(day=>{
+  doc.text("14-Day Meal Plan", 14, 20);
+
+  let rows = [];
+  currentPlan.forEach(day => {
     rows.push([
-      "Day "+day.day, day.breakfast.name, day.lunch.name, day.dinner.name, day.snack.name,
-      day.totalCal+" cal", day.totalProtein+" g P"
+      "Day " + day.day,
+      `${day.breakfast.name} (${day.breakfast.grams})`,
+      `${day.lunch.name} (${day.lunch.grams})`,
+      `${day.dinner.name} (${day.dinner.grams})`,
+      `${day.snack.name} (${day.snack.grams})`,
+      day.totalCal + " cal",
+      day.totalProtein + " g P"
     ]);
   });
-  doc.autoTable({head:[["Day","Breakfast","Lunch","Dinner","Snack","Calories","Protein"]],body:rows,startY:30,styles:{fontSize:9,cellWidth:"wrap"},columnStyles:{0:{cellWidth:14}}});
+
+  doc.autoTable({
+    head: [["Day", "Breakfast", "Lunch", "Dinner", "Snack", "Calories", "Protein"]],
+    body: rows,
+    startY: 30,
+    styles: { fontSize: 8, cellWidth: "wrap" },
+    columnStyles: { 0: { cellWidth: 10 } }
+  });
+
   doc.save("meal_plan.pdf");
 }
-
-refreshProfileList();
 </script>
 </body>
 </html>
