@@ -69,7 +69,17 @@ const mealData = {
     "Grilled chicken breast with 1 cup rice": { cal: 450, protein: 35 },
     "Beef stir-fry with 1 cup rice": { cal: 500, protein: 32 },
     "Fish fillet with 1 cup rice": { cal: 420, protein: 30 },
-    "Tofu and vegetables with 1 cup rice": { cal: 380, protein: 22 }
+    "Tofu and vegetables with 1 cup rice": { cal: 380, protein: 22 },
+    "Pork adobo (lean cuts) with 1 cup rice": { cal: 460, protein: 32 },
+    "Chicken tinola with 1 cup rice": { cal: 400, protein: 34 },
+    "Grilled bangus with 1 cup rice": { cal: 430, protein: 29 },
+    "Ginisang ampalaya with egg + 1 cup rice": { cal: 390, protein: 24 },
+    "Chicken afritada with 1 cup rice": { cal: 440, protein: 33 },
+    "Beef tapa with 1 cup rice": { cal: 470, protein: 31 },
+    "Chicken curry (light coconut milk) with 1 cup rice": { cal: 450, protein: 32 },
+    "Sinigang na hipon with 1 cup rice": { cal: 400, protein: 28 },
+    "Pork sinigang with 1 cup rice": { cal: 470, protein: 30 },
+    "Grilled tilapia with 1 cup rice": { cal: 420, protein: 28 }
   },
   dinner: {
     "2 scoops Herbalife Formula 1 shake with 200ml Oatside milk": { cal: 250, protein: 17 }
@@ -78,7 +88,10 @@ const mealData = {
     "Banana": { cal: 105, protein: 1 },
     "Egg": { cal: 78, protein: 6 },
     "Banana + Egg": { cal: 183, protein: 7 },
-    "Salad": { cal: 120, protein: 3 }
+    "Salad": { cal: 120, protein: 3 },
+    "Greek yogurt (100g)": { cal: 60, protein: 10 },
+    "Apple": { cal: 95, protein: 0 },
+    "Peanut butter (1 tbsp) with cucumber slices": { cal: 120, protein: 4 }
   }
 };
 
@@ -118,24 +131,30 @@ function generateMealPlan(profile) {
   const dinners = Object.keys(mealData.dinner);
   const snacks = Object.keys(mealData.snack);
 
-  let plan = [];
-  let lastLunch = "", lastSnack = "";
+  // Shuffle helper
+  function shuffle(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
 
+  // Shuffle all meals
+  let lunchCycle = shuffle(lunches);
+  let snackCycle = shuffle(snacks);
+
+  // Ensure enough for 14 days (expand if needed)
+  while (lunchCycle.length < 14) lunchCycle = lunchCycle.concat(shuffle(lunches));
+  while (snackCycle.length < 14) snackCycle = snackCycle.concat(shuffle(snacks));
+
+  let plan = [];
   for (let i = 0; i < 14; i++) {
     let breakfast = breakfasts[0];
     let dinner = dinners[0];
-
-    let lunch;
-    do {
-      lunch = lunches[Math.floor(Math.random() * lunches.length)];
-    } while (lunch === lastLunch);
-    lastLunch = lunch;
-
-    let snack;
-    do {
-      snack = snacks[Math.floor(Math.random() * snacks.length)];
-    } while (snack === lastSnack);
-    lastSnack = snack;
+    let lunch = lunchCycle[i];
+    let snack = snackCycle[i];
 
     plan.push({ 
       day: i + 1, 
