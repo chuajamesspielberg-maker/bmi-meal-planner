@@ -2,133 +2,183 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Pinoy 14-Day Meal Planner</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    button { margin: 5px; }
-    .profile-card { border: 1px solid #ccc; padding: 10px; margin: 5px; display: inline-block; }
-    #bmrInfo { margin-top: 20px; font-weight: bold; }
-    #planOutput { margin-top: 20px; white-space: pre-wrap; }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    h1 { color: #333; }
+    label { display: block; margin-top: 10px; }
+    input, select { margin-top: 5px; padding: 5px; }
+    button { margin-top: 10px; padding: 5px 12px; }
+    pre { background: #fff; padding: 15px; border: 1px solid #ddd; white-space: pre-wrap; }
+    .profile-box { margin-bottom: 15px; }
   </style>
 </head>
 <body>
-  <h2>Pinoy 14-Day Meal Planner (PDF + Edit)</h2>
-  
-  <h3>Profiles</h3>
-  <div id="profiles"></div>
-  <button onclick="addProfile()">Add Profile</button>
-  
-  <div id="bmrInfo"></div>
-  <div id="planOutput"></div>
-  
-  <button onclick="generatePlan()">Generate Meal Plan</button>
-  <button onclick="downloadPDF()">Download PDF</button>
-  
+  <h1>Pinoy 14-Day Meal Planner (PDF + Edit)</h1>
+
+  <!-- Profile Management -->
+  <div>
+    <h3>Add / Edit Profile</h3>
+    <label>Name: <input id="pname" type="text" required></label>
+    <label>Age: <input id="age" type="number" required></label>
+    <label>Weight (kg): <input id="weight" type="number" required></label>
+    <label>Height (cm): <input id="height" type="number" required></label>
+    <label>Gender:
+      <select id="gender" required>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </label>
+    <label>Activity Level:
+      <select id="activity" required>
+        <option value="sedentary">Sedentary (little or no exercise)</option>
+        <option value="light">Lightly Active (light exercise/sports 1-3 days/week)</option>
+        <option value="moderate">Moderately Active (moderate exercise 3-5 days/week)</option>
+        <option value="active">Active (hard exercise 6-7 days/week)</option>
+        <option value="veryActive">Very Active (physical job or intense exercise)</option>
+      </select>
+    </label>
+    <button onclick="addProfile()">Save Profile</button>
+  </div>
+
+  <!-- Profile Selection -->
+  <div class="profile-box">
+    <h3>Select Profile</h3>
+    <select id="profileSelect" onchange="loadProfile()"></select>
+    <button onclick="editProfile()">Edit</button>
+    <button onclick="deleteProfile()">Delete</button>
+  </div>
+
+  <!-- BMR + Macro Info -->
+  <div id="bmrInfo" style="margin-top: 20px; font-weight: bold;"></div>
+
+  <!-- Actions -->
+  <div>
+    <button onclick="generatePlan()">Generate 14-Day Plan</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+  </div>
+
+  <!-- Output -->
+  <pre id="output"></pre>
+
 <script>
 let profiles = JSON.parse(localStorage.getItem("profiles") || "[]");
-let selectedProfile = null;
 let currentPlan = [];
 
-function saveProfiles() {
-  localStorage.setItem("profiles", JSON.stringify(profiles));
-  renderProfiles();
-}
-
-function renderProfiles() {
-  let container = document.getElementById("profiles");
-  container.innerHTML = "";
-  profiles.forEach((p, i) => {
-    let div = document.createElement("div");
-    div.className = "profile-card";
-    div.innerHTML = `
-      <b>${p.name}</b><br>
-      Age: ${p.age}, Weight: ${p.weight}kg, Height: ${p.height}cm, Gender: ${p.gender}<br>
-      Activity: ${p.activity}<br>
-      <button onclick="selectProfile(${i})">Select</button>
-      <button onclick="editProfile(${i})">Edit</button>
-      <button onclick="deleteProfile(${i})">Delete</button>
-    `;
-    container.appendChild(div);
-  });
-}
-renderProfiles();
-
+// Save profile
 function addProfile() {
-  let name = prompt("Name?");
-  if (!name) return;
-  let age = +prompt("Age?");
-  let weight = +prompt("Weight (kg)?");
-  let height = +prompt("Height (cm)?");
-  let gender = prompt("Gender (male/female)?", "male");
-  let activity = prompt("Activity (sedentary/light/moderate/active/very_active)?", "sedentary");
-  profiles.push({ name, age, weight, height, gender, activity });
-  saveProfiles();
-}
+  let profile = {
+    name: document.getElementById("pname").value,
+    age: parseInt(document.getElementById("age").value),
+    weight: parseFloat(document.getElementById("weight").value),
+    height: parseFloat(document.getElementById("height").value),
+    gender: document.getElementById("gender").value,
+    activity: document.getElementById("activity").value
+  };
 
-function editProfile(i) {
-  let p = profiles[i];
-  p.name = prompt("Name?", p.name) || p.name;
-  p.age = +prompt("Age?", p.age) || p.age;
-  p.weight = +prompt("Weight (kg)?", p.weight) || p.weight;
-  p.height = +prompt("Height (cm)?", p.height) || p.height;
-  p.gender = prompt("Gender (male/female)?", p.gender) || p.gender;
-  p.activity = prompt("Activity (sedentary/light/moderate/active/very_active)?", p.activity) || p.activity;
-  saveProfiles();
-}
+  if (!profile.name) { alert("Name required"); return; }
 
-function deleteProfile(i) {
-  if (confirm("Delete this profile?")) {
-    profiles.splice(i, 1);
-    saveProfiles();
-  }
-}
-
-function selectProfile(i) {
-  selectedProfile = profiles[i];
-  alert("Selected " + selectedProfile.name);
-}
-
-function calculateBMR(profile) {
-  let { age, weight, height, gender, activity } = profile;
-  let bmr;
-  if (gender === "male") {
-    bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  let existing = profiles.findIndex(p => p.name === profile.name);
+  if (existing >= 0) {
+    profiles[existing] = profile;
   } else {
-    bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    profiles.push(profile);
   }
-  const activityLevels = {
-    sedentary: 1.2,
-    light: 1.375,
-    moderate: 1.55,
-    active: 1.725,
-    very_active: 1.9
-  };
-  let maintenance = bmr * (activityLevels[activity] || 1.2);
-  return { 
-    bmr, 
-    maintenance, 
-    fatLoss: maintenance - 500, 
-    muscleGain: maintenance + 300 
+  localStorage.setItem("profiles", JSON.stringify(profiles));
+  refreshProfiles();
+}
+
+// Populate dropdown
+function refreshProfiles() {
+  let sel = document.getElementById("profileSelect");
+  sel.innerHTML = profiles.map(p => `<option>${p.name}</option>`).join("");
+}
+refreshProfiles();
+
+// Load profile into form
+function loadProfile() {
+  let sel = document.getElementById("profileSelect");
+  let p = profiles.find(x => x.name === sel.value);
+  if (!p) return;
+  document.getElementById("pname").value = p.name;
+  document.getElementById("age").value = p.age;
+  document.getElementById("weight").value = p.weight;
+  document.getElementById("height").value = p.height;
+  document.getElementById("gender").value = p.gender;
+  document.getElementById("activity").value = p.activity;
+}
+
+function editProfile() {
+  loadProfile();
+}
+
+function deleteProfile() {
+  let sel = document.getElementById("profileSelect");
+  let name = sel.value;
+  if (!name) return;
+  profiles = profiles.filter(p => p.name !== name);
+  localStorage.setItem("profiles", JSON.stringify(profiles));
+  refreshProfiles();
+  document.getElementById("output").textContent = "";
+  document.getElementById("bmrInfo").innerHTML = "";
+}
+
+// Macro calculator
+function getMacros(calories) {
+  let protein = (calories * 0.30) / 4;
+  let carbs = (calories * 0.40) / 4;
+  let fats = (calories * 0.30) / 9;
+  return {
+    protein: protein.toFixed(0),
+    carbs: carbs.toFixed(0),
+    fats: fats.toFixed(0)
   };
 }
 
-const meals = {
-  breakfast: { "Herbalife Shake + Oatside Milk": { cal: 250, protein: 15 } },
-  dinner:    { "Herbalife Shake + Oatside Milk": { cal: 250, protein: 15 } },
+// BMR Calculation
+function calculateBMR(profile) {
+  let bmr;
+  if (profile.gender === "male") {
+    bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5;
+  } else {
+    bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
+  }
+
+  let factor = 1.2;
+  if (profile.activity === "light") factor = 1.375;
+  if (profile.activity === "moderate") factor = 1.55;
+  if (profile.activity === "active") factor = 1.725;
+  if (profile.activity === "veryActive") factor = 1.9;
+
+  let maintenance = bmr * factor;
+  return {
+    bmr,
+    maintenance,
+    fatLoss: maintenance - 500,
+    muscleGain: maintenance + 500,
+    macros: {
+      maintenance: getMacros(maintenance),
+      fatLoss: getMacros(maintenance - 500),
+      muscleGain: getMacros(maintenance + 500)
+    }
+  };
+}
+
+// Meals
+let meals = {
+  breakfast: {
+    "Herbalife Shake": { cal: 200, protein: 17 }
+  },
   lunch: {
-    "Grilled chicken breast + 1 cup rice + vegetables": { cal: 450, protein: 35 },
-    "Fish fillet + 1 cup rice + vegetables": { cal: 430, protein: 33 },
-    "Lean pork adobo + 1 cup rice + vegetables": { cal: 480, protein: 30 },
-    "Tofu stir-fry + 1 cup rice": { cal: 400, protein: 20 },
-    "Beef tapa + 1 cup rice + vegetables": { cal: 500, protein: 32 },
-    "Chicken tinola + 1 cup rice": { cal: 420, protein: 28 },
-    "Sinigang na hipon + 1 cup rice": { cal: 410, protein: 26 },
-    "Beef nilaga + 1 cup rice": { cal: 480, protein: 30 },
-    "Chicken curry + 1 cup rice": { cal: 470, protein: 28 },
-    "Ginisang monggo + 1 cup rice": { cal: 390, protein: 22 }
+    "Grilled Chicken + Rice": { cal: 450, protein: 40 },
+    "Fish + Rice": { cal: 400, protein: 35 },
+    "Lean Pork + Rice": { cal: 500, protein: 38 },
+    "Tofu + Vegetables": { cal: 350, protein: 25 }
+  },
+  dinner: {
+    "Herbalife Shake": { cal: 200, protein: 17 }
   },
   snack: {
     "Banana": { cal: 105, protein: 1 },
@@ -141,74 +191,95 @@ const meals = {
   }
 };
 
-function getUniqueMeals(mealOptions, days) {
-  let keys = Object.keys(mealOptions);
-  let plan = [];
-  let used = new Set();
-  for (let i = 0; i < days; i++) {
-    let available = keys.filter(k => !used.has(k));
-    if (available.length === 0) { used.clear(); available = keys; }
-    let choice = available[Math.floor(Math.random() * available.length)];
-    used.add(choice);
-    plan.push({ name: choice, ...mealOptions[choice] });
-  }
-  return plan;
-}
-
+// Generate unique 14-day plan
 function generatePlan() {
-  if (!selectedProfile) return alert("Select a profile first!");
-  let calc = calculateBMR(selectedProfile);
+  let sel = document.getElementById("profileSelect");
+  let profile = profiles.find(x => x.name === sel.value);
+  if (!profile) { alert("Select a profile"); return; }
 
-  // show on page
+  let calc = calculateBMR(profile);
+
   document.getElementById("bmrInfo").innerHTML = `
     <p>BMR: ${calc.bmr.toFixed(0)} kcal/day</p>
-    <p>Maintenance Calories: ${calc.maintenance.toFixed(0)} kcal/day</p>
-    <p>Recommended for Fat Loss: ${calc.fatLoss.toFixed(0)} kcal/day</p>
-    <p>Recommended for Muscle Gain: ${calc.muscleGain.toFixed(0)} kcal/day</p>
+    <p>Maintenance: ${calc.maintenance.toFixed(0)} kcal/day 
+      (P: ${calc.macros.maintenance.protein}g, C: ${calc.macros.maintenance.carbs}g, F: ${calc.macros.maintenance.fats}g)</p>
+    <p>Fat Loss: ${calc.fatLoss.toFixed(0)} kcal/day 
+      (P: ${calc.macros.fatLoss.protein}g, C: ${calc.macros.fatLoss.carbs}g, F: ${calc.macros.fatLoss.fats}g)</p>
+    <p>Muscle Gain: ${calc.muscleGain.toFixed(0)} kcal/day 
+      (P: ${calc.macros.muscleGain.protein}g, C: ${calc.macros.muscleGain.carbs}g, F: ${calc.macros.muscleGain.fats}g)</p>
   `;
 
-  let lunchPlan = getUniqueMeals(meals.lunch, 14);
-  let snackPlan = getUniqueMeals(meals.snack, 14);
+  let lunches = Object.keys(meals.lunch);
+  let snacks = Object.keys(meals.snack);
+
+  let usedLunches = shuffle([...lunches]);
+  let usedSnacks = shuffle([...snacks]);
 
   currentPlan = [];
   let out = "";
-  for (let day = 0; day < 14; day++) {
+
+  for (let i = 1; i <= 14; i++) {
+    if (usedLunches.length === 0) usedLunches = shuffle([...lunches]);
+    if (usedSnacks.length === 0) usedSnacks = shuffle([...snacks]);
+
+    let lunchKey = usedLunches.pop();
+    let snackKey = usedSnacks.pop();
+
     let planDay = {
-      day: day+1,
-      breakfast: { name: "Herbalife Shake + Oatside Milk", ...meals.breakfast["Herbalife Shake + Oatside Milk"] },
-      lunch: lunchPlan[day],
-      dinner: { name: "Herbalife Shake + Oatside Milk", ...meals.dinner["Herbalife Shake + Oatside Milk"] },
-      snack: snackPlan[day]
+      day: i,
+      breakfast: { name: "Herbalife Shake", ...meals.breakfast["Herbalife Shake"] },
+      lunch: { name: lunchKey, ...meals.lunch[lunchKey] },
+      dinner: { name: "Herbalife Shake", ...meals.dinner["Herbalife Shake"] },
+      snack: { name: snackKey, ...meals.snack[snackKey] }
     };
 
-    // totals
-    planDay.totalCal = planDay.breakfast.cal + planDay.lunch.cal + planDay.dinner.cal + planDay.snack.cal;
-    planDay.totalProtein = planDay.breakfast.protein + planDay.lunch.protein + planDay.dinner.protein + planDay.snack.protein;
+    let totalCal = planDay.breakfast.cal + planDay.lunch.cal + planDay.dinner.cal + planDay.snack.cal;
+    let totalProtein = planDay.breakfast.protein + planDay.lunch.protein + planDay.dinner.protein + planDay.snack.protein;
+
+    planDay.totalCal = totalCal;
+    planDay.totalProtein = totalProtein;
 
     currentPlan.push(planDay);
 
-    out += `Day ${planDay.day}\n`;
+    out += `Day ${i}\n`;
     out += `  Breakfast: ${planDay.breakfast.name} (${planDay.breakfast.cal} cal, ${planDay.breakfast.protein}g protein)\n`;
     out += `  Lunch: ${planDay.lunch.name} (${planDay.lunch.cal} cal, ${planDay.lunch.protein}g protein)\n`;
     out += `  Dinner: ${planDay.dinner.name} (${planDay.dinner.cal} cal, ${planDay.dinner.protein}g protein)\n`;
     out += `  Snack: ${planDay.snack.name} (${planDay.snack.cal} cal, ${planDay.snack.protein}g protein)\n`;
-    out += `  👉 Total: ${planDay.totalCal} cal, ${planDay.totalProtein}g protein\n\n`;
+    out += `  👉 Total: ${totalCal} cal, ${totalProtein}g protein\n\n`;
   }
-  document.getElementById("planOutput").innerText = out;
+
+  document.getElementById("output").textContent = out;
 }
 
-function downloadPDF() {
-  if (!selectedProfile || currentPlan.length === 0) return alert("Generate plan first!");
-  const { jsPDF } = window.jspdf;
-  let doc = new jsPDF();
-  let calc = calculateBMR(selectedProfile);
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
-  doc.setFontSize(12);
-  doc.text(`Meal Plan for ${selectedProfile.name}`, 10, 10);
-  doc.text(`BMR: ${calc.bmr.toFixed(0)} kcal/day`, 10, 20);
-  doc.text(`Maintenance: ${calc.maintenance.toFixed(0)} kcal/day`, 10, 30);
-  doc.text(`Fat Loss: ${calc.fatLoss.toFixed(0)} kcal/day`, 10, 40);
-  doc.text(`Muscle Gain: ${calc.muscleGain.toFixed(0)} kcal/day`, 10, 50);
+// Download PDF
+function downloadPDF() {
+  if (currentPlan.length === 0) { alert("Generate plan first"); return; }
+
+  let sel = document.getElementById("profileSelect");
+  let profile = profiles.find(x => x.name === sel.value);
+  let calc = calculateBMR(profile);
+
+  let { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+
+  doc.setFontSize(14);
+  doc.text("14-Day Meal Plan", 14, 20);
+  doc.text(`Client: ${profile.name}`, 14, 30);
+
+  doc.setFontSize(11);
+  doc.text(`BMR: ${calc.bmr.toFixed(0)} kcal/day`, 14, 40);
+  doc.text(`Maintenance: ${calc.maintenance.toFixed(0)} kcal/day (P:${calc.macros.maintenance.protein}g C:${calc.macros.maintenance.carbs}g F:${calc.macros.maintenance.fats}g)`, 14, 46);
+  doc.text(`Fat Loss: ${calc.fatLoss.toFixed(0)} kcal/day (P:${calc.macros.fatLoss.protein}g C:${calc.macros.fatLoss.carbs}g F:${calc.macros.fatLoss.fats}g)`, 14, 52);
+  doc.text(`Muscle Gain: ${calc.muscleGain.toFixed(0)} kcal/day (P:${calc.macros.muscleGain.protein}g C:${calc.macros.muscleGain.carbs}g F:${calc.macros.muscleGain.fats}g)`, 14, 58);
 
   let rows = currentPlan.map(p => [
     p.day,
@@ -218,12 +289,14 @@ function downloadPDF() {
     p.snack.name,
     `${p.totalCal} cal / ${p.totalProtein}g`
   ]);
+
   doc.autoTable({
     head: [["Day","Breakfast","Lunch","Dinner","Snack","Daily Total"]],
     body: rows,
-    startY: 60,
+    startY: 65,
     styles: { fontSize: 8 }
   });
+
   doc.save("MealPlan.pdf");
 }
 </script>
