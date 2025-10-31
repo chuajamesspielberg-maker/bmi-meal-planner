@@ -8,7 +8,10 @@
     body { font-family: Arial, sans-serif; margin: 20px; }
     h2 { margin-top: 30px; }
     select, input { margin: 5px 0; padding: 5px; }
-    .btn { margin-top: 10px; padding: 5px 10px; }
+    .btn { margin-top: 10px; padding: 6px 12px; cursor: pointer; border: 1px solid #444; border-radius: 6px; background: #f2f2f2; }
+    .btn:hover { background: #e6e6e6; }
+    .delete-btn { background: #ffcccc; border: 1px solid #c00; color: #900; }
+    .delete-btn:hover { background: #ff9999; }
     .meal-day { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
   </style>
 </head>
@@ -61,7 +64,9 @@
     <option value="gain">Gain Weight</option>
   </select><br>
 
-  <button class="btn" onclick="saveProfile()">Save Profile</button>
+  <button class="btn" onclick="saveProfile()">💾 Save Profile</button>
+  <button class="btn" onclick="resetForm()">🔄 Reset Form</button>
+  <button class="btn delete-btn" onclick="deleteProfile()">🗑️ Delete Saved Profile</button>
 
   <h2>Profile</h2>
   <pre id="profileInfo"></pre>
@@ -75,7 +80,6 @@
   <script>
     let profile = null;
 
-    // Herbalife & meals with grams + macros
     const foodDB = {
       breakfast: [
         { name: "Herbalife Shake", grams: "2 scoops Formula 1 + 200ml Oatside milk", cal: 220, protein: 17, carbs: 28, fat: 5 },
@@ -107,13 +111,18 @@
     }
 
     function saveProfile() {
-      const name = document.getElementById("name").value;
+      const name = document.getElementById("name").value.trim();
       const age = parseInt(document.getElementById("age").value);
       const gender = document.getElementById("gender").value;
       const weight = parseFloat(document.getElementById("weight").value);
       const height = parseFloat(document.getElementById("height").value);
       const activity = parseFloat(document.getElementById("activity").value);
       const goal = document.getElementById("goal").value;
+
+      if (!name || !age || !weight || !height) {
+        alert("Please fill in all required fields.");
+        return;
+      }
 
       const bmr = calculateBMR(weight, height, age, gender);
       const maintain = Math.round(bmr * activity);
@@ -139,6 +148,13 @@
         bmr, maintain, lose, gain, targetCalories, proteinTarget, carbsTarget, fatTarget
       };
 
+      localStorage.setItem("mealPlannerProfile", JSON.stringify(profile));
+      showProfile();
+      alert("✅ Profile saved successfully!");
+    }
+
+    function showProfile() {
+      if (!profile) return;
       document.getElementById("profileInfo").innerText = `
 Name: ${profile.name}
 Age: ${profile.age}
@@ -156,12 +172,53 @@ Restrictions: ${profile.restrictions.length ? profile.restrictions.join(", ") : 
       `;
     }
 
+    window.onload = function() {
+      const savedProfile = localStorage.getItem("mealPlannerProfile");
+      if (savedProfile) {
+        profile = JSON.parse(savedProfile);
+        showProfile();
+        alert(`👋 Welcome back, ${profile.name}! Your profile has been loaded.`);
+      }
+    };
+
+    function resetForm() {
+      document.querySelectorAll("input, select").forEach(el => {
+        if (el.type === "select-multiple" || el.multiple) {
+          for (let option of el.options) option.selected = false;
+        } else if (el.tagName === "SELECT") {
+          el.selectedIndex = 0;
+        } else {
+          el.value = "";
+        }
+      });
+      document.getElementById("profileInfo").innerText = "";
+      profile = null;
+      alert("Form has been cleared!");
+    }
+
+    function deleteProfile() {
+      const confirmDelete = confirm("⚠️ Are you sure you want to delete your saved profile? This cannot be undone.");
+      if (!confirmDelete) return;
+
+      localStorage.removeItem("mealPlannerProfile");
+      document.getElementById("profileInfo").innerText = "";
+      profile = null;
+      alert("🗑️ Your saved profile has been permanently deleted.");
+    }
+
+    function pickMeal(type) {
+      let options = foodDB[type].filter(m => {
+        if (!profile.restrictions.length) return true;
+        return !profile.restrictions.some(r => m.name.toLowerCase().includes(r));
+      });
+      return options[Math.floor(Math.random() * options.length)];
+    }
+
     function generateMealPlan() {
       if (!profile) {
         alert("Save profile first!");
         return;
       }
-
       const planDiv = document.getElementById("mealPlan");
       planDiv.innerHTML = "";
 
@@ -194,14 +251,6 @@ Restrictions: ${profile.restrictions.length ? profile.restrictions.join(", ") : 
         `;
         planDiv.appendChild(div);
       }
-    }
-
-    function pickMeal(type) {
-      let options = foodDB[type].filter(m => {
-        if (!profile.restrictions.length) return true;
-        return !profile.restrictions.some(r => m.name.toLowerCase().includes(r));
-      });
-      return options[Math.floor(Math.random() * options.length)];
     }
 
     function downloadMealPlan() {
