@@ -1,284 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meal Planner</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍽️ Multi-User Meal Planner</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h2 { margin-top: 30px; }
-    select, input { margin: 5px 0; padding: 5px; }
-    .btn { margin-top: 10px; padding: 6px 12px; cursor: pointer; border: 1px solid #444; border-radius: 6px; background: #f2f2f2; }
-    .btn:hover { background: #e6e6e6; }
-    .delete-btn { background: #ffcccc; border: 1px solid #c00; color: #900; }
-    .delete-btn:hover { background: #ff9999; }
-    .meal-day { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 2rem;
+      color: #333;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      color: #111;
+    }
+    form, .meal-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: 1rem auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 0.4rem;
+    }
+    .btn-container {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .btn {
+      background: #0078d4;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      margin: 0.3rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .btn:hover {
+      background: #005fa3;
+    }
+    #profileDisplay {
+      background: #fff;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .profiles-container {
+      margin-top: 1rem;
+      background: #f9fafb;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .profile-card {
+      background: white;
+      margin: 0.5rem 0;
+      padding: 0.7rem;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .profile-card button {
+      margin-left: 6px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    .profile-card button:hover {
+      opacity: 0.8;
+    }
+    .load-btn {
+      background: #0078d4;
+      color: white;
+    }
+    .delete-btn {
+      background: #e81123;
+      color: white;
+    }
   </style>
 </head>
 <body>
-  <h1>Meal Planner</h1>
+  <h1>🥗 Multi-User Meal Planner</h1>
 
-  <h2>Create Profile</h2>
-  <label>Name: <input type="text" id="name"></label><br>
-  <label>Age: <input type="number" id="age"></label><br>
-  <label>Gender: 
-    <select id="gender">
-      <option value="male">Male</option>
-      <option value="female">Female</option>
+  <!-- Profile form -->
+  <form id="mealForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" placeholder="Enter name" required />
+
+    <label for="age">Age:</label>
+    <input type="number" id="age" placeholder="Enter age" />
+
+    <label for="weight">Weight (kg):</label>
+    <input type="number" id="weight" placeholder="Enter weight" />
+
+    <label for="goal">Fitness Goal:</label>
+    <select id="goal">
+      <option value="fat loss">Fat Loss</option>
+      <option value="muscle gain">Muscle Gain</option>
+      <option value="maintenance">Maintenance</option>
     </select>
-  </label><br>
-  <label>Weight (kg): <input type="number" id="weight"></label><br>
-  <label>Height (cm): <input type="number" id="height"></label><br>
-  <label>Activity Level:
-    <select id="activity">
-      <option value="1.2">Sedentary</option>
-      <option value="1.375">Lightly active</option>
-      <option value="1.55">Moderately active</option>
-      <option value="1.725">Very active</option>
-      <option value="1.9">Super active</option>
-    </select>
-  </label><br>
 
-  <h3>Macro Split (%)</h3>
-  <label>Protein: <input type="number" id="proteinSplit" value="30"></label><br>
-  <label>Carbs: <input type="number" id="carbsSplit" value="40"></label><br>
-  <label>Fat: <input type="number" id="fatSplit" value="30"></label><br>
+    <div class="btn-container">
+      <button type="button" class="btn" onclick="saveProfile()">💾 Save Profile</button>
+      <button type="button" class="btn" onclick="resetForm()">🔄 Reset Form</button>
+      <button type="button" class="btn" onclick="showProfilesList()">📋 View Saved Profiles</button>
+    </div>
+  </form>
 
-  <h3>Restrictions (optional)</h3>
-  <select id="restrictions" multiple>
-    <option value="meat">Meat</option>
-    <option value="pork">Pork</option>
-    <option value="chicken">Chicken</option>
-    <option value="fish">Fish</option>
-    <option value="veggies">Veggies</option>
-    <option value="rice">Rice</option>
-    <option value="dairy">Dairy</option>
-    <option value="egg">Egg</option>
-    <option value="banana">Banana</option>
-  </select><br>
+  <!-- Meal Plan Section -->
+  <div class="meal-section" id="mealSection" style="display:none;">
+    <h3>🍴 Meal Plan for <span id="mealUser"></span></h3>
 
-  <h3>Plan Goal</h3>
-  <select id="goal">
-    <option value="maintain">Maintain</option>
-    <option value="lose">Lose Weight</option>
-    <option value="gain">Gain Weight</option>
-  </select><br>
+    <label for="breakfast">Breakfast:</label>
+    <textarea id="breakfast" rows="2" placeholder="E.g. 2 scoops Herbalife shake + oats"></textarea>
 
-  <button class="btn" onclick="saveProfile()">💾 Save Profile</button>
-  <button class="btn" onclick="resetForm()">🔄 Reset Form</button>
-  <button class="btn delete-btn" onclick="deleteProfile()">🗑️ Delete Saved Profile</button>
+    <label for="lunch">Lunch:</label>
+    <textarea id="lunch" rows="2" placeholder="E.g. Chicken breast + veggies"></textarea>
 
-  <h2>Profile</h2>
-  <pre id="profileInfo"></pre>
+    <label for="dinner">Dinner:</label>
+    <textarea id="dinner" rows="2" placeholder="E.g. Shake + fruits"></textarea>
 
-  <h2>Meal Plan</h2>
-  <button class="btn" onclick="generateMealPlan()">Generate 14-Day Meal Plan</button>
-  <button class="btn" onclick="downloadMealPlan()">Download Meal Plan (PDF)</button>
-  <div id="mealPlan"></div>
+    <label for="snacks">Snacks:</label>
+    <textarea id="snacks" rows="2" placeholder="E.g. Eggs, almonds, or yogurt"></textarea>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <div class="btn-container">
+      <button class="btn" onclick="saveMealPlan()">🥗 Save Meal Plan</button>
+    </div>
+  </div>
+
+  <div id="profileDisplay"></div>
+  <div id="savedProfiles" class="profiles-container"></div>
+
   <script>
     let profile = null;
 
-    const foodDB = {
-      breakfast: [
-        { name: "Herbalife Shake", grams: "2 scoops Formula 1 + 200ml Oatside milk", cal: 220, protein: 17, carbs: 28, fat: 5 },
-        { name: "Herbalife Shake + Banana", grams: "2 scoops Formula 1 + 200ml milk + 1 banana", cal: 320, protein: 18, carbs: 55, fat: 6 },
-        { name: "Herbalife Shake + Oats", grams: "2 scoops Formula 1 + 200ml milk + 40g oats", cal: 350, protein: 20, carbs: 50, fat: 7 }
-      ],
-      dinner: [
-        { name: "Herbalife Shake", grams: "2 scoops Formula 1 + 200ml Oatside milk", cal: 220, protein: 17, carbs: 28, fat: 5 },
-        { name: "Herbalife Shake + Banana", grams: "2 scoops Formula 1 + 200ml milk + 1 banana", cal: 320, protein: 18, carbs: 55, fat: 6 },
-        { name: "Herbalife Shake + Oats", grams: "2 scoops Formula 1 + 200ml milk + 40g oats", cal: 350, protein: 20, carbs: 50, fat: 7 }
-      ],
-      lunch: [
-        { name: "Grilled Chicken + Rice", grams: "150g chicken + 100g cooked rice + 50g broccoli", cal: 400, protein: 38, carbs: 30, fat: 8 },
-        { name: "Beef Stir Fry", grams: "120g lean beef + 150g veggies", cal: 350, protein: 32, carbs: 15, fat: 14 },
-        { name: "Tofu + Rice", grams: "150g tofu + 100g rice + 100g veggies", cal: 380, protein: 25, carbs: 40, fat: 12 }
-      ],
-      snack: [
-        { name: "Banana", grams: "120g", cal: 105, protein: 1, carbs: 27, fat: 0 },
-        { name: "Boiled Egg", grams: "1 large (50g)", cal: 70, protein: 6, carbs: 1, fat: 5 },
-        { name: "Banana + Egg", grams: "120g banana + 50g egg", cal: 175, protein: 7, carbs: 28, fat: 5 },
-        { name: "Salad", grams: "100g mixed greens + 20g vinaigrette", cal: 90, protein: 2, carbs: 8, fat: 5 }
-      ]
-    };
-
-    function calculateBMR(weight, height, age, gender) {
-      return gender === "male"
-        ? 10 * weight + 6.25 * height - 5 * age + 5
-        : 10 * weight + 6.25 * height - 5 * age - 161;
-    }
-
+    // --- Save or update a profile ---
     function saveProfile() {
       const name = document.getElementById("name").value.trim();
-      const age = parseInt(document.getElementById("age").value);
-      const gender = document.getElementById("gender").value;
-      const weight = parseFloat(document.getElementById("weight").value);
-      const height = parseFloat(document.getElementById("height").value);
-      const activity = parseFloat(document.getElementById("activity").value);
+      const age = document.getElementById("age").value;
+      const weight = document.getElementById("weight").value;
       const goal = document.getElementById("goal").value;
 
-      if (!name || !age || !weight || !height) {
-        alert("Please fill in all required fields.");
+      if (!name) {
+        alert("Please enter a name.");
         return;
       }
 
-      const bmr = calculateBMR(weight, height, age, gender);
-      const maintain = Math.round(bmr * activity);
-      const lose = maintain - 500;
-      const gain = maintain + 500;
+      const newProfile = { name, age, weight, goal, meals: profile?.meals || {} };
+      let profiles = JSON.parse(localStorage.getItem("mealPlannerProfiles") || "[]");
+      const index = profiles.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
 
-      let targetCalories = maintain;
-      if (goal === "lose") targetCalories = lose;
-      if (goal === "gain") targetCalories = gain;
+      if (index >= 0) profiles[index] = newProfile;
+      else profiles.push(newProfile);
 
-      const proteinPct = parseInt(document.getElementById("proteinSplit").value);
-      const carbsPct = parseInt(document.getElementById("carbsSplit").value);
-      const fatPct = parseInt(document.getElementById("fatSplit").value);
-
-      const proteinTarget = Math.round((targetCalories * (proteinPct / 100)) / 4);
-      const carbsTarget = Math.round((targetCalories * (carbsPct / 100)) / 4);
-      const fatTarget = Math.round((targetCalories * (fatPct / 100)) / 9);
-
-      profile = {
-        name, age, gender, weight, height, activity, goal,
-        macroSplit: { protein: proteinPct, carbs: carbsPct, fat: fatPct },
-        restrictions: Array.from(document.getElementById("restrictions").selectedOptions).map(opt => opt.value),
-        bmr, maintain, lose, gain, targetCalories, proteinTarget, carbsTarget, fatTarget
-      };
-
-      localStorage.setItem("mealPlannerProfile", JSON.stringify(profile));
+      localStorage.setItem("mealPlannerProfiles", JSON.stringify(profiles));
+      profile = newProfile;
       showProfile();
-      alert("✅ Profile saved successfully!");
+      showMealSection();
+      alert(`✅ Profile for ${name} saved!`);
     }
 
+    // --- Show saved profiles ---
+    function showProfilesList() {
+      const profiles = JSON.parse(localStorage.getItem("mealPlannerProfiles") || "[]");
+      const container = document.getElementById("savedProfiles");
+
+      if (profiles.length === 0) {
+        container.innerHTML = "<p>No saved profiles yet.</p>";
+        return;
+      }
+
+      const list = profiles.map(
+        (p, i) => `
+          <div class="profile-card">
+            <div>
+              <strong>${p.name}</strong> — ${p.age || '?'} yrs, ${p.weight || '?'} kg, Goal: ${p.goal || '-'}
+            </div>
+            <div>
+              <button class="load-btn" onclick="loadProfile(${i})">📂 Load</button>
+              <button class="delete-btn" onclick="deleteProfile(${i})">🗑</button>
+            </div>
+          </div>`
+      ).join("");
+
+      container.innerHTML = `<h3>Saved Profiles</h3>${list}`;
+    }
+
+    // --- Load profile ---
+    function loadProfile(index) {
+      const profiles = JSON.parse(localStorage.getItem("mealPlannerProfiles") || "[]");
+      if (profiles[index]) {
+        profile = profiles[index];
+        showProfile();
+        showMealSection();
+        alert(`📂 Loaded profile for ${profile.name}!`);
+      }
+    }
+
+    // --- Delete profile ---
+    function deleteProfile(index) {
+      if (!confirm("Are you sure you want to delete this profile?")) return;
+      let profiles = JSON.parse(localStorage.getItem("mealPlannerProfiles") || "[]");
+      profiles.splice(index, 1);
+      localStorage.setItem("mealPlannerProfiles", JSON.stringify(profiles));
+      showProfilesList();
+    }
+
+    // --- Reset form ---
+    function resetForm() {
+      document.getElementById("mealForm").reset();
+      document.getElementById("profileDisplay").innerHTML = "";
+      document.getElementById("mealSection").style.display = "none";
+    }
+
+    // --- Display profile ---
     function showProfile() {
-      if (!profile) return;
-      document.getElementById("profileInfo").innerText = `
-Name: ${profile.name}
-Age: ${profile.age}
-Gender: ${profile.gender}
-Weight: ${profile.weight} kg
-Height: ${profile.height} cm
-Activity Factor: ${profile.activity}
-Goal: ${profile.goal.toUpperCase()}
-BMR: ${profile.bmr} kcal/day
-Calories: Maintain ${profile.maintain}, Weight Loss ${profile.lose}, Weight Gain ${profile.gain}
-Target Calories (for goal): ${profile.targetCalories}
-Target Macros: Protein ${profile.proteinTarget}g | Carbs ${profile.carbsTarget}g | Fat ${profile.fatTarget}g
-Macro Split: Protein ${profile.macroSplit.protein}%, Carbs ${profile.macroSplit.carbs}%, Fat ${profile.macroSplit.fat}%
-Restrictions: ${profile.restrictions.length ? profile.restrictions.join(", ") : "None"}
+      document.getElementById("profileDisplay").innerHTML = `
+        <h3>${profile.name}</h3>
+        <p>Age: ${profile.age || '-'}</p>
+        <p>Weight: ${profile.weight || '-'} kg</p>
+        <p>Goal: ${profile.goal || '-'}</p>
       `;
     }
 
-    window.onload = function() {
-      const savedProfile = localStorage.getItem("mealPlannerProfile");
-      if (savedProfile) {
-        profile = JSON.parse(savedProfile);
-        showProfile();
-        alert(`👋 Welcome back, ${profile.name}! Your profile has been loaded.`);
-      }
-    };
-
-    function resetForm() {
-      document.querySelectorAll("input, select").forEach(el => {
-        if (el.type === "select-multiple" || el.multiple) {
-          for (let option of el.options) option.selected = false;
-        } else if (el.tagName === "SELECT") {
-          el.selectedIndex = 0;
-        } else {
-          el.value = "";
-        }
-      });
-      document.getElementById("profileInfo").innerText = "";
-      profile = null;
-      alert("Form has been cleared!");
+    // --- Show meal section with current meals ---
+    function showMealSection() {
+      const section = document.getElementById("mealSection");
+      section.style.display = "block";
+      document.getElementById("mealUser").innerText = profile.name;
+      document.getElementById("breakfast").value = profile.meals?.breakfast || "";
+      document.getElementById("lunch").value = profile.meals?.lunch || "";
+      document.getElementById("dinner").value = profile.meals?.dinner || "";
+      document.getElementById("snacks").value = profile.meals?.snacks || "";
     }
 
-    function deleteProfile() {
-      const confirmDelete = confirm("⚠️ Are you sure you want to delete your saved profile? This cannot be undone.");
-      if (!confirmDelete) return;
-
-      localStorage.removeItem("mealPlannerProfile");
-      document.getElementById("profileInfo").innerText = "";
-      profile = null;
-      alert("🗑️ Your saved profile has been permanently deleted.");
-    }
-
-    function pickMeal(type) {
-      let options = foodDB[type].filter(m => {
-        if (!profile.restrictions.length) return true;
-        return !profile.restrictions.some(r => m.name.toLowerCase().includes(r));
-      });
-      return options[Math.floor(Math.random() * options.length)];
-    }
-
-    function generateMealPlan() {
+    // --- Save meal plan for current profile ---
+    function saveMealPlan() {
       if (!profile) {
-        alert("Save profile first!");
+        alert("Please load or create a profile first.");
         return;
       }
-      const planDiv = document.getElementById("mealPlan");
-      planDiv.innerHTML = "";
 
-      for (let day = 1; day <= 14; day++) {
-        let meals = {
-          breakfast: pickMeal("breakfast"),
-          lunch: pickMeal("lunch"),
-          dinner: pickMeal("dinner"),
-          snack: pickMeal("snack")
-        };
+      const meals = {
+        breakfast: document.getElementById("breakfast").value,
+        lunch: document.getElementById("lunch").value,
+        dinner: document.getElementById("dinner").value,
+        snacks: document.getElementById("snacks").value
+      };
 
-        let totals = { cal: 0, protein: 0, carbs: 0, fat: 0 };
-        Object.values(meals).forEach(m => {
-          totals.cal += m.cal;
-          totals.protein += m.protein;
-          totals.carbs += m.carbs;
-          totals.fat += m.fat;
-        });
+      profile.meals = meals;
 
-        const div = document.createElement("div");
-        div.className = "meal-day";
-        div.innerHTML = `
-          <h3>Day ${day}</h3>
-          Breakfast: ${meals.breakfast.name} (${meals.breakfast.grams})<br>
-          Lunch: ${meals.lunch.name} (${meals.lunch.grams})<br>
-          Dinner: ${meals.dinner.name} (${meals.dinner.grams})<br>
-          Snack: ${meals.snack.name} (${meals.snack.grams})<br><br>
-          <b>Daily Totals:</b> ${totals.cal} kcal | Protein: ${totals.protein}g | Carbs: ${totals.carbs}g | Fat: ${totals.fat}g<br>
-          <b>Targets:</b> ${profile.targetCalories} kcal | Protein: ${profile.proteinTarget}g | Carbs: ${profile.carbsTarget}g | Fat: ${profile.fatTarget}g
-        `;
-        planDiv.appendChild(div);
-      }
+      let profiles = JSON.parse(localStorage.getItem("mealPlannerProfiles") || "[]");
+      const index = profiles.findIndex(p => p.name.toLowerCase() === profile.name.toLowerCase());
+      if (index >= 0) profiles[index] = profile;
+      localStorage.setItem("mealPlannerProfiles", JSON.stringify(profiles));
+
+      alert(`🥗 Meal plan saved for ${profile.name}!`);
     }
 
-    function downloadMealPlan() {
-      if (!profile) {
-        alert("Save profile and generate plan first!");
-        return;
-      }
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      doc.setFontSize(12);
-      doc.text("Meal Plan", 10, 10);
-      doc.text(`Name: ${profile.name}`, 10, 20);
-      doc.text(`Goal: ${profile.goal}`, 10, 30);
-      doc.text(`BMR: ${profile.bmr} kcal`, 10, 40);
-      doc.text(`Target Calories: ${profile.targetCalories}`, 10, 50);
-      doc.text(`Macros: Protein ${profile.proteinTarget}g, Carbs ${profile.carbsTarget}g, Fat ${profile.fatTarget}g`, 10, 60);
-
-      let y = 70;
-      const days = document.querySelectorAll(".meal-day");
-      days.forEach((day, i) => {
-        if (y > 270) { doc.addPage(); y = 20; }
-        doc.text(day.innerText, 10, y);
-        y += 60;
-      });
-
-      doc.save("mealplan.pdf");
-    }
+    // --- Auto-load profiles on startup ---
+    window.onload = showProfilesList;
   </script>
 </body>
 </html>
