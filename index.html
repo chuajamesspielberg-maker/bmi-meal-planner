@@ -1,297 +1,528 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Filipino BMI Meal Planner</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Herbalife Fitness Planner</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #fafafa; }
-    h1 { color: #2c3e50; }
-    h2, h3 { margin-top: 25px; color: #34495e; }
-    select, input { margin: 5px 0; padding: 6px; width: 220px; }
-    .btn { margin-top: 10px; padding: 6px 12px; background: #2ecc71; border: none; color: white; border-radius: 5px; cursor: pointer; }
-    .btn:hover { background: #27ae60; }
-    .btn-danger { background: #e74c3c; }
-    .btn-danger:hover { background: #c0392b; }
-    .profile-list { margin-top: 10px; padding: 10px; border: 1px solid #ccc; background: #fff; max-width: 400px; }
-    .meal-day { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; background: #fff; border-radius: 8px; }
-    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; max-width: 400px; }
+    body{font-family:Arial,Helvetica,sans-serif;background:#f6f8fa;margin:0;padding:20px;color:#122;}
+    .wrap{max-width:1100px;margin:0 auto;}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{margin:0;color:#0b6;}
+    .grid{display:grid;grid-template-columns:1fr 380px;gap:16px;margin-top:18px}
+    form, .panel{background:#fff;padding:16px;border-radius:10px;box-shadow:0 6px 20px rgba(12,20,30,0.06)}
+    label{display:block;margin-top:8px;font-weight:600}
+    input, select{width:100%;padding:8px;border-radius:8px;border:1px solid #d2d8de;margin-top:6px}
+    .row{display:flex;gap:8px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;border:none;background:#0b6;color:#fff;cursor:pointer;font-weight:700;margin-top:10px}
+    .btn.gray{background:#5f7b8a}
+    .btn.danger{background:#e23b3b}
+    .small{font-size:0.9rem;color:#54606a;margin-top:8px}
+    .profiles{max-height:420px;overflow:auto;margin-top:8px}
+    .profile-card{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#f4fbf8;margin-bottom:8px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid #e6eef0;padding:8px;text-align:left;vertical-align:top}
+    th{background:#eafff4}
+    pre{white-space:pre-wrap;background:#f4f6f8;padding:10px;border-radius:6px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <h1>Filipino BMI Meal Planner</h1>
+  <div class="wrap">
+    <header>
+      <h1>Herbalife Fitness Planner</h1>
+      <div style="text-align:right">
+        <div class="small">Multi-profile • Filipino-friendly meals • TDEE-based targets</div>
+      </div>
+    </header>
 
-  <h2>Create Profile</h2>
-  <label>Name: <input type="text" id="name"></label><br>
-  <label>Age: <input type="number" id="age"></label><br>
-  <label>Gender: 
-    <select id="gender">
-      <option value="male">Male</option>
-      <option value="female">Female</option>
-    </select>
-  </label><br>
-  <label>Weight (kg): <input type="number" id="weight"></label><br>
-  <label>Height (cm): <input type="number" id="height"></label><br>
-  <label>Activity Level:
-    <select id="activity">
-      <option value="1.2">Sedentary</option>
-      <option value="1.375">Lightly active</option>
-      <option value="1.55">Moderately active</option>
-      <option value="1.725">Very active</option>
-      <option value="1.9">Super active</option>
-    </select>
-  </label><br>
+    <div class="grid">
+      <!-- LEFT: form & meal plan -->
+      <div>
+        <form id="profileForm" onsubmit="return false;">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="e.g. James" required>
 
-  <h3>Macro Split (%)</h3>
-  <label>Protein: <input type="number" id="proteinSplit" value="30"></label><br>
-  <label>Carbs: <input type="number" id="carbsSplit" value="40"></label><br>
-  <label>Fat: <input type="number" id="fatSplit" value="30"></label><br>
+          <div class="row">
+            <div style="flex:1">
+              <label for="age">Age</label>
+              <input id="age" type="number" min="0" placeholder="Years">
+            </div>
+            <div style="flex:1">
+              <label for="gender">Gender</label>
+              <select id="gender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
 
-  <h3>Restrictions (optional)</h3>
-  <select id="restrictions" multiple>
-    <option value="pork">Pork</option>
-    <option value="beef">Beef</option>
-    <option value="chicken">Chicken</option>
-    <option value="fish">Fish</option>
-    <option value="veggies">Veggies</option>
-    <option value="dairy">Dairy</option>
-    <option value="egg">Egg</option>
-    <option value="banana">Banana</option>
-  </select><br>
+          <div class="row">
+            <div style="flex:1">
+              <label for="weight">Weight (kg)</label>
+              <input id="weight" type="number" step="0.1" placeholder="kg">
+            </div>
+            <div style="flex:1">
+              <label for="height">Height (cm)</label>
+              <input id="height" type="number" step="0.1" placeholder="cm">
+            </div>
+          </div>
 
-  <h3>Plan Goal</h3>
-  <select id="goal">
-    <option value="maintain">Maintain</option>
-    <option value="lose">Lose Weight</option>
-    <option value="gain">Gain Weight</option>
-  </select><br>
+          <label for="activity">Activity Level</label>
+          <select id="activity" title="Choose the description that best matches weekly activity">
+            <option value="1.2">🏠 Sedentary — Little/no exercise (desk job)</option>
+            <option value="1.375">🚶 Lightly active — Light exercise 1–3 days/week</option>
+            <option value="1.55">🏋️ Moderately active — Moderate exercise 3–5 days/week</option>
+            <option value="1.725">💪 Very active — Hard exercise 6–7 days/week</option>
+            <option value="1.9">🔥 Extra active — Very intense daily training/physical job</option>
+          </select>
+          <div class="small">Activity multiplier applied to BMR → gives TDEE (daily energy needs).</div>
 
-  <button class="btn" onclick="saveProfile()">Save Profile</button>
-  <button class="btn" onclick="resetForm()">Reset Form</button>
+          <label for="adjustment">Calorie Adjustment (goal)</label>
+          <select id="adjustment">
+            <option value="0.8">Lose weight —20% (recommended)</option>
+            <option value="0.9">Mild loss —10%</option>
+            <option value="1.0">Maintain — 0%</option>
+            <option value="1.15">Gain (muscle) +15%</option>
+            <option value="1.25">Aggressive gain +25%</option>
+          </select>
+          <div class="small">Target Calories = BMR × Activity × Adjustment</div>
 
-  <h2>Saved Profiles</h2>
-  <div id="savedProfiles" class="profile-list"></div>
+          <label>Macro split (%)</label>
+          <div class="row">
+            <input id="proteinSplit" type="number" min="0" max="100" value="30" placeholder="Protein">
+            <input id="carbsSplit" type="number" min="0" max="100" value="40" placeholder="Carbs">
+            <input id="fatSplit" type="number" min="0" max="100" value="30" placeholder="Fat">
+          </div>
 
-  <h2>Profile</h2>
-  <pre id="profileInfo"></pre>
+          <label for="restrictions">Restrictions (Ctrl/Cmd + click to multi-select)</label>
+          <select id="restrictions" multiple size="5" style="width:100%;padding:8px;border-radius:8px;border:1px solid #d2d8de">
+            <option value="pork">Pork</option>
+            <option value="fish">Fish</option>
+            <option value="beef">Beef</option>
+            <option value="chicken">Chicken</option>
+            <option value="dairy">Dairy</option>
+            <option value="egg">Egg</option>
+            <option value="banana">Banana</option>
+            <option value="rice">Rice</option>
+            <option value="veggies">Veggies</option>
+          </select>
 
-  <h2>Meal Plan</h2>
-  <button class="btn" onclick="generateMealPlan()">Generate 14-Day Meal Plan</button>
-  <button class="btn" onclick="downloadMealPlan()">Download Meal Plan (PDF)</button>
-  <div id="mealPlan"></div>
+          <div style="margin-top:12px">
+            <button class="btn" onclick="saveProfile()">💾 Save / Update Profile</button>
+            <button class="btn gray" onclick="showProfilesList()">📋 Saved Profiles</button>
+            <button class="btn" onclick="generateMealPlanForProfile()">🧾 Generate 14-Day Plan</button>
+            <button class="btn danger" onclick="resetForm()">🔄 Reset Form</button>
+          </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    let profile = null;
+          <div id="profileSummary" style="margin-top:12px"></div>
+        </form>
 
-    const foodDB = {
-      breakfast: [
-        { name: "Herbalife Shake", grams: "2 scoops Formula 1 + 200ml Oatside milk", cal: 220, protein: 17, carbs: 28, fat: 5 },
-        { name: "Oatmeal with Milk", grams: "40g oats + 200ml milk", cal: 250, protein: 10, carbs: 35, fat: 8 },
-        { name: "Pandesal with Egg", grams: "2 pcs pandesal + 1 boiled egg", cal: 280, protein: 12, carbs: 35, fat: 8 },
-        { name: "Herbalife Shake + Banana", grams: "2 scoops Formula 1 + 200ml milk + 1 banana", cal: 320, protein: 18, carbs: 55, fat: 6 }
-      ],
-      lunch: [
-        { name: "Chicken Adobo + Rice", grams: "150g chicken + 100g rice", cal: 420, protein: 36, carbs: 35, fat: 14 },
-        { name: "Beef Giniling + Veggies", grams: "120g lean beef + 100g mixed veggies + 100g rice", cal: 440, protein: 33, carbs: 40, fat: 14 },
-        { name: "Tofu + Rice + Veggies", grams: "150g tofu + 100g rice + 100g veggies", cal: 380, protein: 25, carbs: 40, fat: 12 },
-        { name: "Fried Fish + Rice", grams: "120g fish + 100g rice + 50g veggies", cal: 400, protein: 35, carbs: 35, fat: 10 },
-        { name: "Tinolang Manok", grams: "1 bowl with rice", cal: 360, protein: 30, carbs: 35, fat: 8 }
-      ],
-      dinner: [
-        { name: "Herbalife Shake", grams: "2 scoops Formula 1 + 200ml Oatside milk", cal: 220, protein: 17, carbs: 28, fat: 5 },
-        { name: "Chicken Tinola", grams: "1 bowl with rice", cal: 350, protein: 30, carbs: 32, fat: 8 },
-        { name: "Sinigang na Baboy", grams: "1 bowl with rice", cal: 400, protein: 30, carbs: 35, fat: 12 },
-        { name: "Vegetable Stir Fry + Rice", grams: "150g mixed veggies + 100g rice", cal: 300, protein: 10, carbs: 50, fat: 5 }
-      ],
-      snack: [
-        { name: "Banana", grams: "120g", cal: 105, protein: 1, carbs: 27, fat: 0 },
-        { name: "Boiled Egg", grams: "1 large (50g)", cal: 70, protein: 6, carbs: 1, fat: 5 },
-        { name: "SkyFlakes", grams: "3 pcs", cal: 120, protein: 2, carbs: 20, fat: 4 },
-        { name: "Fruit Salad (light)", grams: "100g", cal: 160, protein: 2, carbs: 25, fat: 6 },
-        { name: "Mixed Nuts", grams: "30g", cal: 170, protein: 6, carbs: 6, fat: 15 }
-      ]
+        <!-- Meal plan panel -->
+        <div id="mealPanel" class="panel" style="margin-top:14px; display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <strong id="mealOwner"></strong><br>
+              <span id="calorieInfo" class="small"></span>
+            </div>
+            <div>
+              <button class="btn" onclick="saveMealPlanForProfile()">💾 Save Meal Plan</button>
+              <button class="btn gray" onclick="downloadMealPlanPDF()">⬇️ Download PDF</button>
+            </div>
+          </div>
+          <div id="mealPlanTable" style="margin-top:12px;overflow:auto"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: profiles list -->
+      <div class="panel">
+        <h3 style="margin-top:0">Saved Profiles</h3>
+        <div id="profilesList" class="profiles"></div>
+        <div style="margin-top:12px">
+          <button class="btn" onclick="exportProfiles()">📤 Export All (.json)</button>
+          <button class="btn gray" onclick="importProfiles()">📥 Import (.json)</button>
+          <button class="btn danger" onclick="clearAllProfiles()">🧹 Clear ALL</button>
+        </div>
+        <div class="small" style="margin-top:10px">Profiles and meal plans are stored locally in your browser (localStorage).</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------- Food database (Philippine-friendly) ---------- */
+const foodDB = {
+  breakfast: [
+    { id:'hf1', name:'Herbalife Formula 1 (2 scoops) + 200ml Oatside milk', cal:220, protein:17, carbs:28, fat:5, tags:['shake'] },
+    { id:'hf2', name:'Herbalife + 1 banana', cal:320, protein:18, carbs:55, fat:6, tags:['shake','banana'] },
+    { id:'pandesal_egg', name:'Pandesal (2) + boiled egg', cal:280, protein:12, carbs:35, fat:8, tags:['bread','egg'] },
+    { id:'oat_milk', name:'Oatmeal 40g + milk', cal:250, protein:10, carbs:35, fat:8, tags:['oats'] }
+  ],
+  lunch: [
+    { id:'chicken_adobo', name:'Chicken Adobo + 1 cup rice + veggies', cal:420, protein:36, carbs:35, fat:14, tags:['chicken','rice'] },
+    { id:'pork_adobo', name:'Pork Adobo + rice + veggies', cal:460, protein:30, carbs:36, fat:18, tags:['pork','rice'] },
+    { id:'tinola', name:'Tinolang Manok (chicken soup) + rice', cal:360, protein:30, carbs:35, fat:8, tags:['chicken','rice'] },
+    { id:'sinigang', name:'Sinigang (pork or fish) + rice', cal:400, protein:30, carbs:35, fat:12, tags:['pork','fish','rice'] },
+    { id:'giniling', name:'Giniling (ground pork/beef) + rice + veggies', cal:440, protein:33, carbs:40, fat:14, tags:['pork','beef','rice'] },
+    { id:'tofu_rice', name:'Tofu stir-fry + rice + veggies', cal:380, protein:25, carbs:40, fat:12, tags:['veggies','tofu','rice'] },
+    { id:'fish_fillet', name:'Pan-fried fish fillet + rice + veggies', cal:400, protein:35, carbs:35, fat:10, tags:['fish','rice'] },
+    { id:'beef_stir', name:'Beef stir-fry + rice + veggies', cal:440, protein:34, carbs:40, fat:14, tags:['beef','rice'] }
+  ],
+  dinner: [
+    { id:'hf_dinner', name:'Herbalife Formula 1 (2 scoops) + 200ml Oatside milk', cal:220, protein:17, carbs:28, fat:5, tags:['shake'] },
+    { id:'hf_oats', name:'Herbalife + 40g oats', cal:300, protein:20, carbs:40, fat:6, tags:['shake','oats'] },
+    { id:'tinola_d', name:'Light Tinola + small rice', cal:350, protein:28, carbs:30, fat:8, tags:['chicken','rice'] },
+    { id:'veg_stir', name:'Vegetable stir-fry + small rice', cal:300, protein:10, carbs:40, fat:6, tags:['veggies','rice'] }
+  ],
+  snack: [
+    { id:'banana', name:'Banana', cal:105, protein:1, carbs:27, fat:0, tags:['banana'] },
+    { id:'boiled_egg', name:'Boiled egg', cal:70, protein:6, carbs:1, fat:5, tags:['egg'] },
+    { id:'skyflakes', name:'SkyFlakes + peanut butter', cal:150, protein:4, carbs:20, fat:7, tags:['bread','peanut'] },
+    { id:'mixed_nuts', name:'Mixed nuts (30g)', cal:170, protein:6, carbs:6, fat:15, tags:['nuts'] },
+    { id:'fruit', name:'Seasonal fruit / fruit salad', cal:160, protein:2, carbs:25, fat:6, tags:['fruit'] }
+  ]
+};
+
+/* ---------- Storage keys ---------- */
+const STORAGE_KEY = 'herbalife_profiles_v3';
+
+/* ---------- Helpers ---------- */
+function loadAllProfiles(){ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+function saveAllProfiles(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+function round(n){ return Math.round(n); }
+function escapeHtml(s){ return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ---------- Current profile in memory ---------- */
+let currentProfile = null;
+
+/* ---------- BMR / TDEE / Macros ---------- */
+function calculateBMR(weight, height, age, gender){
+  // Mifflin - St Jeor
+  if (!weight || !height || !age) return null;
+  return gender === 'male'
+    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+}
+function computeTargetsFromProfile(p){
+  const bmr = calculateBMR(p.weight, p.height, p.age, p.gender);
+  if (!bmr) return null;
+  const activity = parseFloat(p.activity || 1.2);
+  const adjustment = parseFloat(p.adjustment || 1.0);
+  const tdee = bmr * activity;
+  const targetCalories = Math.round(tdee * adjustment);
+  // macros from % splits
+  const proteinPct = (p.macroSplit?.protein ?? 30)/100;
+  const carbsPct = (p.macroSplit?.carbs ?? 40)/100;
+  const fatPct = (p.macroSplit?.fat ?? 30)/100;
+  const proteinG = Math.round((targetCalories * proteinPct) / 4);
+  const carbsG = Math.round((targetCalories * carbsPct) / 4);
+  const fatG = Math.round((targetCalories * fatPct) / 9);
+  return { bmr: round(bmr), tdee: Math.round(tdee), targetCalories, proteinG, carbsG, fatG };
+}
+
+/* ---------- Profile CRUD ---------- */
+function saveProfile(){
+  const name = document.getElementById('name').value.trim();
+  if(!name) return alert('Please enter a name.');
+  const age = parseInt(document.getElementById('age').value) || null;
+  const gender = document.getElementById('gender').value || 'male';
+  const weight = parseFloat(document.getElementById('weight').value) || null;
+  const height = parseFloat(document.getElementById('height').value) || null;
+  const activity = document.getElementById('activity').value || '1.2';
+  const adjustment = document.getElementById('adjustment').value || '1.0';
+  const protein = parseInt(document.getElementById('proteinSplit').value) || 30;
+  const carbs = parseInt(document.getElementById('carbsSplit').value) || 40;
+  const fat = parseInt(document.getElementById('fatSplit').value) || 30;
+  const restrictions = Array.from(document.getElementById('restrictions').selectedOptions).map(o=>o.value);
+
+  // build profile
+  const profiles = loadAllProfiles();
+  const existingIdx = profiles.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+  const profileObj = {
+    name, age, gender, weight, height, activity, adjustment,
+    macroSplit: { protein, carbs, fat },
+    restrictions,
+    mealPlan: (existingIdx>=0 ? profiles[existingIdx].mealPlan : null),
+    savedAt: new Date().toISOString()
+  };
+
+  if(existingIdx>=0) profiles[existingIdx] = profileObj;
+  else profiles.push(profileObj);
+  saveAllProfiles(profiles);
+  currentProfile = profileObj;
+  refreshProfilesUI();
+  populateProfileSummary();
+  alert(`Profile "${name}" saved.`);
+}
+
+function showProfilesList(){ refreshProfilesUI(); }
+
+function refreshProfilesUI(){
+  const container = document.getElementById('profilesList');
+  const profiles = loadAllProfiles();
+  if(!profiles.length){ container.innerHTML = '<div class="small">No saved profiles yet.</div>'; return; }
+  container.innerHTML = profiles.map((p,i)=>`
+    <div class="profile-card">
+      <div>
+        <strong>${escapeHtml(p.name)}</strong><br>
+        <small>${p.age? p.age+' yrs':''} ${p.weight? ' • '+p.weight+' kg':''} • ${escapeHtml(p.macroSplit?.protein+'%/'+p.macroSplit?.carbs+'%/'+p.macroSplit?.fat+'%')}</small>
+      </div>
+      <div>
+        <button onclick="loadProfile(${i})" style="background:#0b6;color:#fff;padding:6px 8px;border-radius:6px;border:none;cursor:pointer">📂 Load</button>
+        <button onclick="deleteProfile(${i})" style="background:#e23b3b;color:#fff;padding:6px 8px;border-radius:6px;border:none;cursor:pointer">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---------- Load / Delete ---------- */
+function loadProfile(index){
+  const profiles = loadAllProfiles();
+  const p = profiles[index];
+  if(!p) return alert('Profile not found');
+  currentProfile = p;
+  // populate form
+  document.getElementById('name').value = p.name;
+  document.getElementById('age').value = p.age || '';
+  document.getElementById('gender').value = p.gender || 'male';
+  document.getElementById('weight').value = p.weight || '';
+  document.getElementById('height').value = p.height || '';
+  document.getElementById('activity').value = p.activity || '1.2';
+  document.getElementById('adjustment').value = p.adjustment || '1.0';
+  document.getElementById('proteinSplit').value = p.macroSplit?.protein ?? 30;
+  document.getElementById('carbsSplit').value = p.macroSplit?.carbs ?? 40;
+  document.getElementById('fatSplit').value = p.macroSplit?.fat ?? 30;
+  const restSelect = document.getElementById('restrictions');
+  Array.from(restSelect.options).forEach(opt => opt.selected = p.restrictions?.includes(opt.value));
+  populateProfileSummary();
+  if(p.mealPlan) renderMealPlanTable(p.mealPlan);
+  else document.getElementById('mealPanel').style.display = 'none';
+  refreshProfilesUI();
+  alert(`Loaded "${p.name}".`);
+}
+
+function deleteProfile(index){
+  if(!confirm('Delete this profile (and its saved plan)?')) return;
+  let profiles = loadAllProfiles();
+  profiles.splice(index,1);
+  saveAllProfiles(profiles);
+  if(currentProfile && currentProfile.name === (profiles[index]?.name)) currentProfile = null;
+  refreshProfilesUI();
+  document.getElementById('mealPanel').style.display = 'none';
+}
+
+/* ---------- Reset Form ---------- */
+function resetForm(){
+  document.getElementById('profileForm').reset();
+  document.getElementById('restrictions').selectedIndex = -1;
+  currentProfile = null;
+  document.getElementById('profileSummary').innerHTML = '';
+  document.getElementById('mealPanel').style.display = 'none';
+}
+
+/* ---------- Meal Plan Generation (non-repetitive) ---------- */
+function generateMealPlanForProfile(){
+  const name = document.getElementById('name').value.trim();
+  if(!name) return alert('Enter a name (and save profile) first.');
+
+  // Ensure profile saved (so mealPlan persists)
+  saveProfile();
+
+  // build pools filtered by restrictions
+  const restrictions = currentProfile.restrictions || [];
+  const filterByRest = (arr) => arr.filter(item => {
+    if(!restrictions.length) return true;
+    // exclude if any restriction matches tags or appears in name
+    return !restrictions.some(r => (item.tags && item.tags.includes(r)) || item.name.toLowerCase().includes(r));
+  });
+
+  let bPool = filterByRest(foodDB.breakfast);
+  let lPool = filterByRest(foodDB.lunch);
+  let dPool = filterByRest(foodDB.dinner);
+  let sPool = filterByRest(foodDB.snack);
+
+  if(!bPool.length || !lPool.length || !dPool.length || !sPool.length) {
+    return alert('Too many restrictions — not enough meal options. Relax some restrictions.');
+  }
+
+  // shuffle helper
+  const shuffle = (arr) => { const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; };
+
+  const days = 14;
+  const buildSeq = (pool) => {
+    const seq = [];
+    const shuffled = shuffle(pool);
+    for(let i=0;i<days;i++){
+      // choose candidate by cycling shuffled
+      let candidate = shuffled[i % shuffled.length];
+      // if same as immediate previous, try to pick different one from pool
+      if(i>0 && candidate.id === seq[i-1].id){
+        let found = shuffled.find(x => x.id !== seq[i-1].id && !seq.slice(-2).some(s=>s.id===x.id));
+        candidate = found || shuffled[(i+1) % shuffled.length];
+      }
+      seq.push(candidate);
+    }
+    return seq;
+  };
+
+  const bSeq = buildSeq(bPool);
+  const lSeq = buildSeq(lPool);
+  const dSeq = buildSeq(dPool);
+  const sSeq = buildSeq(sPool);
+
+  // goal notes based on adjustment choice
+  const adjVal = parseFloat(currentProfile.adjustment || 1.0);
+  const goalNote = (mealType) => {
+    // We infer intent: if adj <1 => weight loss, >1 => gain
+    if(adjVal < 1) {
+      if(mealType==='lunch') return ' (smaller rice portion)';
+      if(mealType==='snack') return ' (choose lighter snack)';
+    } else if(adjVal > 1) {
+      if(mealType==='lunch') return ' (add extra protein / +1/2 cup rice)';
+      if(mealType==='snack') return ' (add calorie-dense snack)';
+    }
+    return '';
+  };
+
+  const plan = [];
+  for(let i=0;i<days;i++){
+    plan.push({
+      day: i+1,
+      breakfast: bSeq[i].name + goalNote('breakfast'),
+      lunch: lSeq[i].name + goalNote('lunch'),
+      dinner: dSeq[i].name + goalNote('dinner'),
+      snack: sSeq[i].name + goalNote('snack')
+    });
+  }
+
+  // attach to profile and save
+  currentProfile.mealPlan = plan;
+  const profiles = loadAllProfiles();
+  const idx = profiles.findIndex(p => p.name.toLowerCase() === currentProfile.name.toLowerCase());
+  if(idx>=0) profiles[idx] = currentProfile; else profiles.push(currentProfile);
+  saveAllProfiles(profiles);
+
+  renderMealPlanTable(plan);
+  document.getElementById('mealPanel').style.display = 'block';
+  populateProfileSummary();
+  refreshProfilesUI();
+  alert('✅ 14-day meal plan generated and saved to profile.');
+}
+
+/* ---------- Render meal plan ---------- */
+function renderMealPlanTable(plan){
+  const container = document.getElementById('mealPlanTable');
+  if(!plan || !plan.length){ container.innerHTML = ''; return; }
+  let html = `<h3 style="margin:0">14-Day Meal Plan</h3>`;
+  html += `<table><thead><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snack</th></tr></thead><tbody>`;
+  plan.forEach(d => {
+    html += `<tr>
+      <td>Day ${d.day}</td>
+      <td>${escapeHtml(d.breakfast)}</td>
+      <td>${escapeHtml(d.lunch)}</td>
+      <td>${escapeHtml(d.dinner)}</td>
+      <td>${escapeHtml(d.snack)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+/* ---------- Save meal plan explicitly (redundant safe save) ---------- */
+function saveMealPlanForProfile(){
+  if(!currentProfile || !currentProfile.mealPlan) return alert('No meal plan to save. Generate one first.');
+  const profiles = loadAllProfiles();
+  const idx = profiles.findIndex(p => p.name.toLowerCase() === currentProfile.name.toLowerCase());
+  if(idx>=0) profiles[idx] = currentProfile; else profiles.push(currentProfile);
+  saveAllProfiles(profiles);
+  refreshProfilesUI();
+  alert('Meal plan saved to profile.');
+}
+
+/* ---------- Download PDF (simple print page) ---------- */
+function downloadMealPlanPDF(){
+  if(!currentProfile || !currentProfile.mealPlan) return alert('Generate a meal plan first.');
+  const plan = currentProfile.mealPlan;
+  let popup = window.open('','_blank','width=900,height=700');
+  const title = `${currentProfile.name} - 14-Day Meal Plan`;
+  let html = `<html><head><title>${title}</title><style>body{font-family:Arial;padding:14px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px}</style></head><body>`;
+  html += `<h2>${escapeHtml(title)}</h2>`;
+  // show targets
+  const targets = computeTargetsFromProfile(currentProfile);
+  if(targets) html += `<p><strong>Target Calories:</strong> ${targets.targetCalories} kcal • Protein ${targets.proteinG}g • Carbs ${targets.carbsG}g • Fat ${targets.fatG}g</p>`;
+  html += `<table><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th><th>Snack</th></tr>`;
+  plan.forEach(d => {
+    html += `<tr><td>Day ${d.day}</td><td>${escapeHtml(d.breakfast)}</td><td>${escapeHtml(d.lunch)}</td><td>${escapeHtml(d.dinner)}</td><td>${escapeHtml(d.snack)}</td></tr>`;
+  });
+  html += `</table></body></html>`;
+  popup.document.write(html);
+  popup.document.close();
+  popup.focus();
+  // user can print to PDF using browser
+}
+
+/* ---------- Clear all profiles ---------- */
+function clearAllProfiles(){
+  if(!confirm('This will permanently delete ALL profiles & meal plans from your browser. Continue?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  currentProfile = null;
+  refreshProfilesUI();
+  document.getElementById('mealPanel').style.display = 'none';
+  alert('All profiles cleared.');
+}
+
+/* ---------- Export / Import ---------- */
+function exportProfiles(){
+  const data = localStorage.getItem(STORAGE_KEY) || '[]';
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'herbalife_profiles_export.json'; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function importProfiles(){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept='application/json';
+  inp.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(!Array.isArray(parsed)) return alert('Invalid file format (expecting JSON array).');
+        saveAllProfiles(parsed);
+        refreshProfilesUI();
+        alert('Profiles imported.');
+      }catch(err){ alert('Failed to import: ' + err.message); }
     };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
 
-    function calculateBMR(weight, height, age, gender) {
-      return gender === "male"
-        ? 10 * weight + 6.25 * height - 5 * age + 5
-        : 10 * weight + 6.25 * height - 5 * age - 161;
-    }
+/* ---------- UI helpers ---------- */
+function populateProfileSummary(){
+  const el = document.getElementById('profileSummary');
+  if(!currentProfile){ el.innerHTML=''; return; }
+  const targets = computeTargetsFromProfile(currentProfile);
+  const info = `
+    <div><strong>${escapeHtml(currentProfile.name)}</strong></div>
+    <div class="small">BMR: ${targets?targets.bmr+' kcal':''} • TDEE: ${targets?targets.tdee+' kcal':''}</div>
+    <div class="small">Target: ${targets?targets.targetCalories+' kcal':''} • Protein ${targets?targets.proteinG+'g':''} • Carbs ${targets?targets.carbsG+'g':''} • Fat ${targets?targets.fatG+'g':''}</div>
+    <div class="small">Restrictions: ${currentProfile.restrictions?.length? escapeHtml(currentProfile.restrictions.join(', ')) : 'None'}</div>
+  `;
+  el.innerHTML = info;
+  // update meal panel header
+  document.getElementById('mealOwner').innerText = currentProfile.name;
+  document.getElementById('calorieInfo').innerText = targets? `Target ${targets.targetCalories} kcal • P ${targets.proteinG}g C ${targets.carbsG}g F ${targets.fatG}g` : '';
+}
 
-    function saveProfile() {
-      const name = document.getElementById("name").value.trim();
-      if (!name) return alert("Please enter a name.");
-
-      const age = parseInt(document.getElementById("age").value);
-      const gender = document.getElementById("gender").value;
-      const weight = parseFloat(document.getElementById("weight").value);
-      const height = parseFloat(document.getElementById("height").value);
-      const activity = parseFloat(document.getElementById("activity").value);
-      const goal = document.getElementById("goal").value;
-
-      const bmr = calculateBMR(weight, height, age, gender);
-      const maintain = Math.round(bmr * activity);
-      const lose = maintain - 500;
-      const gain = maintain + 500;
-
-      let targetCalories = goal === "lose" ? lose : goal === "gain" ? gain : maintain;
-
-      const proteinPct = parseInt(document.getElementById("proteinSplit").value);
-      const carbsPct = parseInt(document.getElementById("carbsSplit").value);
-      const fatPct = parseInt(document.getElementById("fatSplit").value);
-
-      const proteinTarget = Math.round((targetCalories * (proteinPct / 100)) / 4);
-      const carbsTarget = Math.round((targetCalories * (carbsPct / 100)) / 4);
-      const fatTarget = Math.round((targetCalories * (fatPct / 100)) / 9);
-
-      profile = {
-        name, age, gender, weight, height, activity, goal,
-        macroSplit: { protein: proteinPct, carbs: carbsPct, fat: fatPct },
-        restrictions: Array.from(document.getElementById("restrictions").selectedOptions).map(opt => opt.value),
-        bmr, maintain, lose, gain, targetCalories, proteinTarget, carbsTarget, fatTarget
-      };
-
-      localStorage.setItem(`profile_${name}`, JSON.stringify(profile));
-      displaySavedProfiles();
-      showProfileInfo();
-      alert("Profile saved!");
-    }
-
-    function showProfileInfo() {
-      document.getElementById("profileInfo").innerText = `
-Name: ${profile.name}
-Age: ${profile.age}
-Gender: ${profile.gender}
-Weight: ${profile.weight} kg
-Height: ${profile.height} cm
-Goal: ${profile.goal.toUpperCase()}
-BMR: ${profile.bmr} kcal/day
-Target Calories: ${profile.targetCalories}
-Target Macros: Protein ${profile.proteinTarget}g | Carbs ${profile.carbsTarget}g | Fat ${profile.fatTarget}g
-Restrictions: ${profile.restrictions.length ? profile.restrictions.join(", ") : "None"}
-      `;
-    }
-
-    function displaySavedProfiles() {
-      const container = document.getElementById("savedProfiles");
-      container.innerHTML = "";
-      Object.keys(localStorage).filter(k => k.startsWith("profile_")).forEach(key => {
-        const prof = JSON.parse(localStorage.getItem(key));
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <b>${prof.name}</b> (${prof.goal})<br>
-          <button class="btn" onclick="loadProfile('${prof.name}')">Load</button>
-          <button class="btn-danger" onclick="deleteProfile('${prof.name}')">Delete</button>
-          <hr>`;
-        container.appendChild(div);
-      });
-    }
-
-    function loadProfile(name) {
-      const saved = JSON.parse(localStorage.getItem(`profile_${name}`));
-      if (!saved) return;
-      profile = saved;
-      document.getElementById("name").value = saved.name;
-      document.getElementById("age").value = saved.age;
-      document.getElementById("gender").value = saved.gender;
-      document.getElementById("weight").value = saved.weight;
-      document.getElementById("height").value = saved.height;
-      document.getElementById("activity").value = saved.activity;
-      document.getElementById("goal").value = saved.goal;
-      document.getElementById("proteinSplit").value = saved.macroSplit.protein;
-      document.getElementById("carbsSplit").value = saved.macroSplit.carbs;
-      document.getElementById("fatSplit").value = saved.macroSplit.fat;
-      showProfileInfo();
-      alert(`Profile "${name}" loaded!`);
-    }
-
-    function deleteProfile(name) {
-      if (confirm(`Delete profile "${name}"?`)) {
-        localStorage.removeItem(`profile_${name}`);
-        displaySavedProfiles();
-      }
-    }
-
-    function resetForm() {
-      document.querySelectorAll("input, select").forEach(el => {
-        if (el.type === "select-multiple") el.selectedIndex = -1;
-        else el.value = "";
-      });
-      document.getElementById("profileInfo").innerText = "";
-      document.getElementById("mealPlan").innerHTML = "";
-      profile = null;
-      alert("Form cleared!");
-    }
-
-    function pickUniqueMeals(type, usedMeals) {
-      const available = foodDB[type].filter(m => {
-        if (!profile.restrictions.length) return true;
-        return !profile.restrictions.some(r => m.name.toLowerCase().includes(r));
-      }).filter(m => !usedMeals.includes(m.name));
-      if (available.length === 0) return foodDB[type][0];
-      const meal = available[Math.floor(Math.random() * available.length)];
-      usedMeals.push(meal.name);
-      return meal;
-    }
-
-    function generateMealPlan() {
-      if (!profile) return alert("Save or load a profile first!");
-
-      const planDiv = document.getElementById("mealPlan");
-      planDiv.innerHTML = "";
-      const used = { breakfast: [], lunch: [], dinner: [], snack: [] };
-
-      for (let day = 1; day <= 14; day++) {
-        const meals = {
-          breakfast: pickUniqueMeals("breakfast", used.breakfast),
-          lunch: pickUniqueMeals("lunch", used.lunch),
-          dinner: pickUniqueMeals("dinner", used.dinner),
-          snack: pickUniqueMeals("snack", used.snack)
-        };
-
-        const totals = Object.values(meals).reduce((a, m) => ({
-          cal: a.cal + m.cal, protein: a.protein + m.protein, carbs: a.carbs + m.carbs, fat: a.fat + m.fat
-        }), { cal: 0, protein: 0, carbs: 0, fat: 0 });
-
-        const div = document.createElement("div");
-        div.className = "meal-day";
-        div.innerHTML = `
-          <h3>Day ${day}</h3>
-          Breakfast: ${meals.breakfast.name} (${meals.breakfast.grams})<br>
-          Lunch: ${meals.lunch.name} (${meals.lunch.grams})<br>
-          Dinner: ${meals.dinner.name} (${meals.dinner.grams})<br>
-          Snack: ${meals.snack.name} (${meals.snack.grams})<br><br>
-          <b>Daily Totals:</b> ${totals.cal} kcal | Protein: ${totals.protein}g | Carbs: ${totals.carbs}g | Fat: ${totals.fat}g<br>
-          <b>Targets:</b> ${profile.targetCalories} kcal | Protein: ${profile.proteinTarget}g | Carbs: ${profile.carbsTarget}g | Fat: ${profile.fatTarget}g
-        `;
-        planDiv.appendChild(div);
-      }
-    }
-
-    function downloadMealPlan() {
-      if (!profile) return alert("Save and generate plan first!");
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      doc.setFontSize(12);
-      doc.text("14-Day Filipino Meal Plan", 10, 10);
-      doc.text(`Name: ${profile.name}`, 10, 20);
-      doc.text(`Goal: ${profile.goal}`, 10, 30);
-      doc.text(`Target Calories: ${profile.targetCalories}`, 10, 40);
-
-      let y = 50;
-      const days = document.querySelectorAll(".meal-day");
-      days.forEach(day => {
-        if (y > 270) { doc.addPage(); y = 20; }
-        doc.text(day.innerText, 10, y);
-        y += 60;
-      });
-
-      doc.save(`${profile.name}_mealplan.pdf`);
-    }
-
-    window.onload = displaySavedProfiles;
-  </script>
+/* ---------- Init ---------- */
+function init(){
+  refreshProfilesUI();
+  // if any profiles exist, don't auto-load (user chooses)
+}
+init();
+</script>
 </body>
 </html>
